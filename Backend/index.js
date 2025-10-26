@@ -1,13 +1,14 @@
-import express from 'express'
+import express from 'express';
+import mongoose from 'mongoose';
 import { PORT, MongoDbUrl } from './config.js';
-import mongoose, { mongo } from 'mongoose';
 import loginRoute from './Routes/loginRoute.js';
 
 const app = express();
 
-app.get('/', (request, response) =>{
-    console.log(request)
-    return response.status(234).send('Testing')
+app.use(express.json());
+
+app.get('/', (request, response) => {
+    return response.status(200).send('Testing');
 });
 
 app.use('/', loginRoute);
@@ -17,10 +18,9 @@ mongoose
     .then(() => {
         console.log('MongoDB Database is successfully connected');
         app.listen(PORT, () => {
-    console.log(`Server is being hosted on localhost: ${PORT}`);
-});
-
+            console.log(`Server is being hosted on localhost: ${PORT}`);
+        });
     })
-    .catch((error) =>{
+    .catch((error) => {
         console.log(error);
     });
