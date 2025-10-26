@@ -46,4 +46,38 @@ router.post("/signup", async (request, response) => {
     }
 });
 
+router.post("/login", async (request, response) => {
+    try {
+        const { username, email, password } = request.body;
+
+        if (!username && !email || !password) {
+            return response.status(400).json({ error: "Username or email and password are required" });
+        } 
+
+        const user = await User.findOne({
+            $or: [{ username: username }, { email: email }]
+        });
+
+        if (!user) {
+            return response.status(401).json({ error: "Invalid credentials" });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return response.status(401).json({ error: "Invalid credentials" });
+        }
+
+        response.status(200).json({
+            message: "Login successful",
+            user: {
+                username: user.username,
+                role: user.role
+            }
+        });
+    } catch (error) {
+        console.error("Login error:", error);
+        response.status(500).json({ error: "Login failed. Please try again." });
+    }
+});
+
 export default router;
