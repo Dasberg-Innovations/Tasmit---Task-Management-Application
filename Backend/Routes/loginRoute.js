@@ -1,6 +1,8 @@
+import mongoose from 'mongoose';
 import express from 'express';
 import { User } from '../Models/UserLoginModel.js';
 import bcrypt from 'bcrypt'; // Encryption for Password
+
 
 const router = express.Router();
 
@@ -10,11 +12,8 @@ router.post("/register", async (request, response) => {
     try {
         const { username, email, password } = request.body;
 
-        if (!username || !email) {
-            return response.status(400).json({ error: "Username and Email are required to signup." });
-        }
-        if (!password) {
-            return response.status(400).json({ error: "Password is required" });
+        if (!username || !email || !password) {
+            return response.status(400).json({ error: "Username, Email, and Password are required." });
         }
 
         const existingUser = await User.findOne({
@@ -34,15 +33,21 @@ router.post("/register", async (request, response) => {
 
         await newUser.save();
 
-        response.status(201).json({
+        return response.status(201).json({
             message: "User created successfully",
             user: {
                 username: newUser.username,
                 email: newUser.email
             }
         });
+
     } catch (error) {
-        console.error("Signup error:", error);
+        console.error("Signup error:", error.message); // Log the detailed error message
+        if (error instanceof mongoose.Error.ValidationError) {
+            return response.status(400).json({ error: error.message });
+        }
+        // General error logging
+        console.error('Error stack:', error.stack);
         response.status(500).json({ error: "Registration failed. Please try again." });
     }
 });

@@ -14,7 +14,7 @@ const UserSchema = mongoose.Schema(
             unique: true,
             trim: true,
             lowercase: true,
-            match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a Valid Email Address.']
+            match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email address.']
         },
         password: {
             type: String,
@@ -26,4 +26,4 @@ const UserSchema = mongoose.Schema(
     }
 );
 
-export const User = mongoose.model('User', UserSchema, 'User');
+export const User = mongoose.model('User', UserSchema);
