@@ -4,7 +4,7 @@ const Url = 'http://localhost:5555';
 
 export const loginUser = async (username, password) => {
   try {
-    const response = await axios.post(`${Url}/`, {
+    const response = await axios.post(`${Url}/login`, {
       username,
       password
     });

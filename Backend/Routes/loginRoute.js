@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.use(express.json());
 
-router.post("/signup", async (request, response) => {
+router.post("/register", async (request, response) => {
     try {
         const { username, email, password } = request.body;
 
