@@ -6,7 +6,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import HeroPage from "./pages/HeroPage";
 import Settings from "./pages/Settings";
-import Tasks from "./pages/Tasks";
+import TaskManager from "./pages/Tasks";
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -19,7 +19,7 @@ const App = () => {
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="flex flex-col h-screen from-gray-50 to-gray-100">
       <Header />
       <div className="flex flex-1">
         {!isAuthPage && <Sidebar isLoggedIn={isLoggedIn} />}
@@ -29,7 +29,7 @@ const App = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/hero" element={<HeroPage />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/tasks" element={<Tasks />} />
+            <Route path="/tasks" element={<TaskManager />} />
           </Routes>
         </main>
       </div>

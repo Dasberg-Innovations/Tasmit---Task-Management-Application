@@ -3,7 +3,7 @@ import { MdOutlineDone, MdModeEditOutline } from 'react-icons/md';
 import { FaTrash } from 'react-icons/fa';
 import { IoClose } from 'react-icons/io5';
 
-const Tasks = () => {
+const TaskManager = () => {
     const [newTask, setNewTask] = useState('');
     const [tasks, setTasks] = useState([]);
     const [editingTask, setEditingTask] = useState(null);
@@ -97,7 +97,7 @@ const Tasks = () => {
                                             <div className="flex items-center gap-x-4">
                                                 <button
                                                     onClick={() => toggleTask(task._id)}
-                                                    className={`h-6 w-6 border rounded-full flex items-center justify-center ${
+                                                    className={` h-6 w-6 border rounded-full flex items-center justify-center ${
                                                         task.completed
                                                             ? "bg-green-500 border-green-500"
                                                             : "border-gray-300 hover:border-blue-400"
@@ -135,4 +135,4 @@ const Tasks = () => {
     );
 };
 
-export default Tasks;
+export default TaskManager;
