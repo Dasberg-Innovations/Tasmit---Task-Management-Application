@@ -6,7 +6,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import HeroPage from "./pages/HeroPage";
 import Settings from "./pages/Settings";
-import TaskManager from "./pages/Tasks";
+import Tasks from "./pages/Tasks";
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -29,7 +29,7 @@ const App = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/hero" element={<HeroPage />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/tasks" element={<TaskManager />} /> {/* Updated to include TaskManager */}
+            <Route path="/tasks" element={<Tasks />} />
           </Routes>
         </main>
       </div>
