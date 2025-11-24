@@ -14,7 +14,7 @@ function Header() {
   return (
     <header className="bg-white shadow-sm border-b">
       <div className="flex justify-between items-center px-6 py-4">
-        <h1 className="text-xl font-bold text-gray-800">Tasmit</h1>
+        <h1 className="text-xl font-bold text-gray-800">Habot App</h1>
         <div className="flex items-center gap-4">
           {user && (
             <>

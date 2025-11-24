@@ -9,7 +9,7 @@ const Sidebar = () => {
     <div className="flex flex-col w-1/4 h-full p-5 bg-white shadow-md">
       <h1 className="flex items-center gap-1 mb-6">
         <span className="text-blue-600 text-2xl">📋</span>
-        <span className="text-2xl font-bold">TaskMe</span>
+        <span className="text-2xl font-bold">Menu</span>
       </h1>
       <div className="flex flex-col gap-5">
         <Link
