@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import { PORT, MongoDbUrl } from './config.js';
 import loginRoute from './Routes/loginRoute.js';
-
+import taskRoutes from './Routes/taskRoute.js';
 const app = express();
 
 app.use(cors());
@@ -16,6 +16,7 @@ app.get('/', (request, response) => {
 });
 
 app.use('/', loginRoute);
+app.use('/tasks', taskRoutes);
 
 mongoose
     .connect(MongoDbUrl)

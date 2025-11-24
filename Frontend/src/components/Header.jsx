@@ -1,21 +1,34 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { useAuth } from '../components/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 function Header() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
+
   return (
-    <header className="flex justify-between items-center px-8 py-4 bg-gray-900 text-white">
-      <h1 className="text-2xl font-bold">Habit Hero</h1>
-      <nav className="flex space-x-6">
-        <Link to="/login" className="text-white hover:text-blue-300 transition duration-200">
-          Login
-        </Link>
-        <Link to="/hero" className="text-white hover:text-blue-300 transition duration-200">
-          Hero
-        </Link>
-        <Link to="/settings" className="text-white hover:text-blue-300 transition duration-200">
-          Settings
-        </Link>
-      </nav>
+    <header className="bg-white shadow-sm border-b">
+      <div className="flex justify-between items-center px-6 py-4">
+        <h1 className="text-xl font-bold text-gray-800">Tasmit</h1>
+        <div className="flex items-center gap-4">
+          {user && (
+            <>
+              <span className="text-gray-600">Welcome, {user.username}</span>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Logout
+              </button>
+            </>
+          )}
+        </div>
+      </div>
     </header>
   );
 }

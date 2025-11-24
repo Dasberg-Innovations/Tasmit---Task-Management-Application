@@ -1,8 +1,16 @@
-import { Task } from '../Models/TaskMode'
+import { Task } from '../Models/TaskModel.js';
+import { User } from '../Models/UserLoginModel.js';
 
 const getAllTasks = async (req, res) => {
     try {
-        const tasks = await Task.find().populate('username');
+        const { userId } = req.query;
+        let query = {};
+        
+        if (userId) {
+            query.user = userId;
+        }
+        
+        const tasks = await Task.find(query).populate('user', 'username email');
         res.json(tasks);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -10,46 +18,77 @@ const getAllTasks = async (req, res) => {
 };
 
 const createTask = async (req, res) => {
-    const task = new Task({
-        username: req.body.username,
-        Task_Title: req.body.Task_Title,
-        Description: req.body.Description,
-        Task_Completed: req.body.Task_Completed || false
-    });
     try {
+        const { userId, Task_Title, Description, Task_Completed } = req.body;
+
+        if (!userId || !Task_Title || !Description) {
+            return res.status(400).json({ 
+                message: 'User ID, Task_Title, and Description are required' 
+            });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const task = new Task({
+            user: userId,
+            Task_Title: Task_Title,
+            Description: Description,
+            Task_Completed: Task_Completed || false
+        });
+
         const newTask = await task.save();
+        await newTask.populate('user', 'username email');
         res.status(201).json(newTask);
     } catch (err) {
+        console.error('Error creating task:', err);
         res.status(400).json({ message: err.message });
     }
 };
 
-const getTask = async (req, res, next) => {
+const getTasksByUser = async (req, res) => {
     try {
-        const task = await Task.findById(req.params.id).populate('username');
-        if (!task) {
-            return res.status(404).json({ message: 'Task not found' });
-        }
-        res.task = task;
-        next();
+        const { userId } = req.params;
+        const tasks = await Task.find({ user: userId }).populate('user', 'username email');
+        res.json(tasks);
     } catch (err) {
-        return res.status(500).json({ message: err.message });
+        res.status(500).json({ message: err.message });
     }
 };
 
+const getTaskById = async (req, res) => {
+    try {
+        const task = await Task.findById(req.params.id).populate('user', 'username email');
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+        res.json(task);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
 
 const updateTask = async (req, res) => {
-    if (req.body.Task_Title != null) {
-        res.task.Task_Title = req.body.Task_Title;
-    }
-    if (req.body.Description != null) {
-        res.task.Description = req.body.Description;
-    }
-    if (req.body.Task_Completed != null) {
-        res.task.Task_Completed = req.body.Task_Completed;
-    }
     try {
-        const updatedTask = await res.task.save();
+        const task = await Task.findById(req.params.id);
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+
+        if (req.body.Task_Title != null) {
+            task.Task_Title = req.body.Task_Title;
+        }
+        if (req.body.Description != null) {
+            task.Description = req.body.Description;
+        }
+        if (req.body.Task_Completed != null) {
+            task.Task_Completed = req.body.Task_Completed;
+        }
+
+        const updatedTask = await task.save();
+        await updatedTask.populate('user', 'username email');
         res.json(updatedTask);
     } catch (err) {
         res.status(400).json({ message: err.message });
@@ -58,11 +97,23 @@ const updateTask = async (req, res) => {
 
 const deleteTask = async (req, res) => {
     try {
-        await res.task.deleteOne();
+        const task = await Task.findById(req.params.id);
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+        
+        await Task.findByIdAndDelete(req.params.id);
         res.json({ message: 'Task deleted' });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 };
 
-export { getAllTasks, createTask, getTask, updateTask, deleteTask };
+export { 
+    getAllTasks, 
+    createTask, 
+    getTasksByUser, 
+    getTaskById, 
+    updateTask, 
+    deleteTask 
+};

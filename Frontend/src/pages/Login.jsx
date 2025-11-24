@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from '../../../Backend/Controllers/LoginController';
+import { useAuth } from '../components/AuthContext';
 import DesktopImage from '../../src/assets/Landing_Page.jpg';
 
 function Login() {
@@ -8,6 +9,7 @@ function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -16,7 +18,12 @@ function Login() {
     try {
       const data = await loginUser(username, password);
       console.log('Login successful', data);
-      navigate('/hero');
+      if (data.user && data.user.id) {
+        login(data.user);
+        navigate('/hero', { replace: true });
+      } else {
+        throw new Error('Invalid user data received');
+      }
     } catch (error) {
       setError(error.message);
     }

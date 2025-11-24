@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const TaskSchema = mongoose.Schema(
     {
-        username: {
+        user: { 
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
             required: true,
