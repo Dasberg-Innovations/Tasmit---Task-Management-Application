@@ -12,6 +12,7 @@ const TaskManager = () => {
     const [editingTask, setEditingTask] = useState(null);
     const [editedText, setEditedText] = useState('');
     const { user } = useAuth();
+    const [dueDate, setDueDate] = useState('');
 
     useEffect(() => {
         if (user) {
@@ -29,31 +30,42 @@ const TaskManager = () => {
     };
 
     const addTask = async (e) => {
-        e.preventDefault();
-        if (!newTask || !newDescription || !user) return;
-        
-        try {
-            const response = await axios.post('http://localhost:5555/tasks', {
-                userId: user.id,
-                Task_Title: newTask,
-                Description: newDescription,
-                Task_Completed: false
-            });
-            setTasks([...tasks, response.data]);
-            setNewTask('');
-            setNewDescription('');
-        } catch (error) {
-            console.error('Error creating task:', error);
-        }
-    };
+    e.preventDefault();
+    if (!newTask || !newDescription || !user) return;
 
+    try {
+        let dueDateToSend;
+        if (dueDate) {
+            const localDate = new Date(dueDate);
+            dueDateToSend = new Date(localDate.getFullYear(), localDate.getMonth(), localDate.getDate());
+        } else {
+            const oneWeekFromNow = new Date();
+            oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
+            dueDateToSend = new Date(oneWeekFromNow.getFullYear(), oneWeekFromNow.getMonth(), oneWeekFromNow.getDate());
+        }
+
+        const response = await axios.post('http://localhost:5555/tasks', {
+            userId: user.id,
+            Task_Title: newTask,
+            Description: newDescription,
+            Task_Completed: false,
+            Due_Date: dueDateToSend.toISOString()
+        });
+        setTasks([...tasks, response.data]);
+        setNewTask('');
+        setNewDescription('');
+        setDueDate('');
+    } catch (error) {
+        console.error('Error creating task:', error);
+    }
+};
     const toggleTask = async (id) => {
         try {
             const task = tasks.find(t => t._id === id);
             const response = await axios.put(`http://localhost:5555/tasks/${id}`, {
                 Task_Completed: !task.Task_Completed
             });
-            
+
             setTasks(tasks.map((task) =>
                 task._id === id ? response.data : task
             ));
@@ -81,8 +93,8 @@ const TaskManager = () => {
             const response = await axios.put(`http://localhost:5555/tasks/${id}`, {
                 Task_Title: editedText
             });
-            
-            setTasks(tasks.map((task) => 
+
+            setTasks(tasks.map((task) =>
                 task._id === id ? response.data : task
             ));
             setEditingTask(null);
@@ -113,6 +125,13 @@ const TaskManager = () => {
                         placeholder="Task Description"
                         required
                     />
+                    <input
+                        type="date"
+                        value={dueDate}
+                        onChange={(e) => setDueDate(e.target.value)}
+                        className="w-full outline-none px-3 py-2 text-gray-700 placeholder-gray-400 border border-gray-300 rounded-lg"
+                        required
+                    />
                     <button
                         type="submit"
                         className="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium cursor-pointer"
@@ -120,7 +139,7 @@ const TaskManager = () => {
                         Add Task
                     </button>
                 </form>
-                
+
                 <div className="mt-4">
                     {tasks.length === 0 ? (
                         <div className="text-gray-500 text-center">No tasks added yet.</div>
@@ -156,11 +175,10 @@ const TaskManager = () => {
                                             <div className="flex items-center gap-x-4">
                                                 <button
                                                     onClick={() => toggleTask(task._id)}
-                                                    className={`h-6 w-6 border rounded-full flex items-center justify-center ${
-                                                        task.Task_Completed
-                                                            ? "bg-green-500 border-green-500 text-white"
-                                                            : "border-gray-300 hover:border-blue-400"
-                                                    }`}
+                                                    className={`h-6 w-6 border rounded-full flex items-center justify-center ${task.Task_Completed
+                                                        ? "bg-green-500 border-green-500 text-white"
+                                                        : "border-gray-300 hover:border-blue-400"
+                                                        }`}
                                                 >
                                                     {task.Task_Completed && <MdOutlineDone />}
                                                 </button>

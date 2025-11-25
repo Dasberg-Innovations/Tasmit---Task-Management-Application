@@ -8,31 +8,32 @@ import Register from "./pages/Register";
 import HeroPage from "./pages/HeroPage";
 import Settings from "./pages/Settings";
 import TaskManager from "./pages/Tasks";
+import Calendar from "./pages/Calendar";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  
+
   if (loading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
-  
+
   return user ? children : <Navigate to="/login" replace />;
 };
 
 const PublicRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  
+
   if (loading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
-  
+
   return user ? <Navigate to="/hero" replace /> : children;
 };
 
 const AppContent = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
-  
+
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
 
   if (loading) {
@@ -50,53 +51,61 @@ const AppContent = () => {
         {!isAuthPage && <Sidebar />}
         <main className="flex-1 p-5 overflow-y-auto">
           <Routes>
-            <Route 
-              path="/login" 
+            <Route
+              path="/login"
               element={
                 <PublicRoute>
                   <Login />
                 </PublicRoute>
-              } 
+              }
             />
-            <Route 
-              path="/register" 
+            <Route
+              path="/register"
               element={
                 <PublicRoute>
                   <Register />
                 </PublicRoute>
-              } 
+              }
             />
-            <Route 
-              path="/hero" 
+            <Route
+              path="/hero"
               element={
                 <ProtectedRoute>
                   <HeroPage />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/settings" 
+            <Route
+              path="/settings"
               element={
                 <ProtectedRoute>
                   <Settings />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/tasks" 
+            <Route
+              path="/tasks"
               element={
                 <ProtectedRoute>
                   <TaskManager />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/" 
+            <Route
+              path="/"
               element={
                 user ? <Navigate to="/hero" replace /> : <Navigate to="/login" replace />
-              } 
+              }
             />
             <Route path="*" element={<Navigate to={user ? "/hero" : "/login"} replace />} />
+            <Route
+              path="/calendar"
+              element={
+                <ProtectedRoute>
+                  <Calendar />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </main>
       </div>

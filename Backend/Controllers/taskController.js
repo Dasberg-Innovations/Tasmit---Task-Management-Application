@@ -5,11 +5,11 @@ const getAllTasks = async (req, res) => {
     try {
         const { userId } = req.query;
         let query = {};
-        
+
         if (userId) {
             query.user = userId;
         }
-        
+
         const tasks = await Task.find(query).populate('user', 'username email');
         res.json(tasks);
     } catch (err) {
@@ -19,7 +19,7 @@ const getAllTasks = async (req, res) => {
 
 const createTask = async (req, res) => {
     try {
-        const { userId, Task_Title, Description, Task_Completed } = req.body;
+        const { userId, Task_Title, Description, Task_Completed, Due_Date } = req.body;
 
         if (!userId || !Task_Title || !Description) {
             return res.status(400).json({ 
@@ -31,12 +31,22 @@ const createTask = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
+        let dueDate;
+        if (Due_Date) {
+            const parsedDate = new Date(Due_Date);
+            dueDate = new Date(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate());
+        } else {
+            const oneWeekFromNow = new Date();
+            oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
+            dueDate = new Date(oneWeekFromNow.getFullYear(), oneWeekFromNow.getMonth(), oneWeekFromNow.getDate());
+        }
 
         const task = new Task({
             user: userId,
             Task_Title: Task_Title,
             Description: Description,
-            Task_Completed: Task_Completed || false
+            Task_Completed: Task_Completed || false,
+            Due_Date: dueDate
         });
 
         const newTask = await task.save();
@@ -86,6 +96,9 @@ const updateTask = async (req, res) => {
         if (req.body.Task_Completed != null) {
             task.Task_Completed = req.body.Task_Completed;
         }
+        if (req.body.Due_Date != null && !isNaN(new Date(req.body.Due_Date))) {
+            task.Due_Date = new Date(req.body.Due_Date);
+        }
 
         const updatedTask = await task.save();
         await updatedTask.populate('user', 'username email');
@@ -101,7 +114,7 @@ const deleteTask = async (req, res) => {
         if (!task) {
             return res.status(404).json({ message: 'Task not found' });
         }
-        
+
         await Task.findByIdAndDelete(req.params.id);
         res.json({ message: 'Task deleted' });
     } catch (err) {
@@ -109,11 +122,6 @@ const deleteTask = async (req, res) => {
     }
 };
 
-export { 
-    getAllTasks, 
-    createTask, 
-    getTasksByUser, 
-    getTaskById, 
-    updateTask, 
-    deleteTask 
+export {
+    getAllTasks, createTask, getTasksByUser, getTaskById, updateTask, deleteTask
 };
