@@ -23,6 +23,16 @@ const TaskSchema = mongoose.Schema(
         Due_Date: {
             type: Date,
             default: () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) 
+        },
+        Priority: {
+            type: String,
+            enum: ['Low', 'Medium', 'High'],
+            default: 'Medium'
+        },
+        Urgency: {
+            type: String,
+            enum: ['Low', 'Medium', 'High'],
+            default: 'Medium'
         }
     },
     {

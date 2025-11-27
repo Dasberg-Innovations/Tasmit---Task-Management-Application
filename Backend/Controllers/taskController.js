@@ -19,7 +19,7 @@ const getAllTasks = async (req, res) => {
 
 const createTask = async (req, res) => {
     try {
-        const { userId, Task_Title, Description, Task_Completed, Due_Date } = req.body;
+         const { userId, Task_Title, Description, Task_Completed, Due_Date, Priority, Urgency } = req.body;
 
         if (!userId || !Task_Title || !Description) {
             return res.status(400).json({ 
@@ -43,10 +43,12 @@ const createTask = async (req, res) => {
 
         const task = new Task({
             user: userId,
-            Task_Title: Task_Title,
-            Description: Description,
+            Task_Title,
+            Description,
             Task_Completed: Task_Completed || false,
-            Due_Date: dueDate
+            Due_Date: dueDate,
+            Priority: Priority || 'Medium',
+            Urgency: Urgency || 'Medium'
         });
 
         const newTask = await task.save();
@@ -83,22 +85,16 @@ const getTaskById = async (req, res) => {
 const updateTask = async (req, res) => {
     try {
         const task = await Task.findById(req.params.id);
-        if (!task) {
-            return res.status(404).json({ message: 'Task not found' });
-        }
+        if (!task) return res.status(404).json({ message: 'Task not found' });
 
-        if (req.body.Task_Title != null) {
-            task.Task_Title = req.body.Task_Title;
-        }
-        if (req.body.Description != null) {
-            task.Description = req.body.Description;
-        }
-        if (req.body.Task_Completed != null) {
-            task.Task_Completed = req.body.Task_Completed;
-        }
+        if (req.body.Task_Title != null) task.Task_Title = req.body.Task_Title;
+        if (req.body.Description != null) task.Description = req.body.Description;
+        if (req.body.Task_Completed != null) task.Task_Completed = req.body.Task_Completed;
         if (req.body.Due_Date != null && !isNaN(new Date(req.body.Due_Date))) {
             task.Due_Date = new Date(req.body.Due_Date);
         }
+        if (req.body.Priority != null) task.Priority = req.body.Priority;
+        if (req.body.Urgency != null) task.Urgency = req.body.Urgency;
 
         const updatedTask = await task.save();
         await updatedTask.populate('user', 'username email');

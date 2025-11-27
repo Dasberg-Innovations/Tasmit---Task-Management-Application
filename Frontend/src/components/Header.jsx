@@ -21,7 +21,7 @@ function Header() {
               <span className="text-gray-600">Welcome, {user.username}</span>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                className="font-['Noto_Sans'] text-[18px] text-white px-[20px] py-[10px] rounded-[20px] hover:bg-red-600 transition-colors duration-300 bg-red-500"
               >
                 Logout
               </button>
