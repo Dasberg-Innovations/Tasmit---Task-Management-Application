@@ -27,7 +27,7 @@ export default function GoalProgress({ userId }) {
     const totalTasks = tasks.length;
     const completedTasks = tasks.filter(task => task.Task_Completed).length;
 
-    const exerciseProgress = (completedTasks / totalTasks) * 100 || 0; // Prevent division by zero
+    const exerciseProgress = (completedTasks / totalTasks) * 100 || 0;
     const studyProgress = (completedTasks / totalTasks) * 100 || 0;
 
     setGoals([

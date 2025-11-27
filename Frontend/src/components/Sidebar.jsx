@@ -21,7 +21,7 @@ const Sidebar = () => {
           className={`flex items-center gap-2 p-2 rounded-full text-gray-800 hover:bg-blue-200 ${path === "tasks" ? "bg-blue-700 text-white" : ""}`}
         >Tasks</Link>
         <Link
-          to="personal-goals"
+          to="goals"
           className={`flex items-center gap-2 p-2 rounded-full text-gray-800 hover:bg-blue-200 ${path === "personal-goals" ? "bg-blue-700 text-white" : ""}`}
         >Personal Goals</Link>
         <Link

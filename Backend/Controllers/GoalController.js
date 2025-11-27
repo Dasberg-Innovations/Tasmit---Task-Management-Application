@@ -1,4 +1,4 @@
-import { Goal } from '../Models/GoalModel.js'; // Updated import
+import { Goal } from '../Models/PersonalGoalsModel.js';
 import { User } from '../Models/UserLoginModel.js';
 
 const getAllGoals = async (req, res) => {
@@ -47,6 +47,8 @@ const createGoal = async (req, res) => {
         res.status(400).json({ message: err.message });
     }
 };
+
+
 
 const getGoalsByUser = async (req, res) => {
     try {
@@ -101,6 +103,78 @@ const deleteGoal = async (req, res) => {
     }
 };
 
+const addSubGoal = async (req, res) => {
+    try {
+        const { goalId } = req.params;
+        const { title } = req.body;
+
+        if (!title) {
+            return res.status(400).json({ message: 'Subgoal title is required' });
+        }
+
+        const goal = await Goal.findById(goalId);
+        if (!goal) {
+            return res.status(404).json({ message: 'Goal not found' });
+        }
+
+        goal.subGoals.push({
+            title,
+            completed: false
+        });
+
+        const updatedGoal = await goal.save();
+        await updatedGoal.populate('user', 'username email');
+        res.json(updatedGoal);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+};
+
+const updateSubGoal = async (req, res) => {
+    try {
+        const { goalId, subGoalId } = req.params;
+        const { completed, title } = req.body;
+
+        const goal = await Goal.findById(goalId);
+        if (!goal) {
+            return res.status(404).json({ message: 'Goal not found' });
+        }
+
+        const subGoal = goal.subGoals.id(subGoalId);
+        if (!subGoal) {
+            return res.status(404).json({ message: 'Subgoal not found' });
+        }
+
+        if (completed !== undefined) subGoal.completed = completed;
+        if (title !== undefined) subGoal.title = title;
+
+        const updatedGoal = await goal.save();
+        await updatedGoal.populate('user', 'username email');
+        res.json(updatedGoal);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+};
+
+const deleteSubGoal = async (req, res) => {
+    try {
+        const { goalId, subGoalId } = req.params;
+
+        const goal = await Goal.findById(goalId);
+        if (!goal) {
+            return res.status(404).json({ message: 'Goal not found' });
+        }
+
+        goal.subGoals.pull(subGoalId);
+        const updatedGoal = await goal.save();
+        await updatedGoal.populate('user', 'username email');
+        res.json(updatedGoal);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+};
+
 export {
-    getAllGoals, createGoal, getGoalsByUser, getGoalById, updateGoal, deleteGoal
+    getAllGoals, createGoal, getGoalsByUser, getGoalById,
+    updateGoal, deleteGoal, addSubGoal, updateSubGoal, deleteSubGoal
 };

@@ -1,5 +1,21 @@
 import mongoose from "mongoose";
 
+const SubGoalSchema = mongoose.Schema({
+    title: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    completed: {
+        type: Boolean,
+        default: false
+    },
+    created_at: {
+        type: Date,
+        default: Date.now
+    }
+});
+
 const GoalSchema = mongoose.Schema(
     {
         user: {
@@ -19,7 +35,8 @@ const GoalSchema = mongoose.Schema(
         Goal_Completed: {
             type: Boolean,
             default: false
-        }
+        },
+        subGoals: [SubGoalSchema]
     },
     {
         timestamps: true

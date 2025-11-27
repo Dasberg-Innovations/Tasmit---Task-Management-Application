@@ -9,6 +9,7 @@ import HeroPage from "./pages/HeroPage";
 import Settings from "./pages/Settings";
 import TaskManager from "./pages/Tasks";
 import Calendar from "./pages/Calendar";
+import PersonalGoalsPage from "./pages/PersonalGoalsPage";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -88,6 +89,14 @@ const AppContent = () => {
               element={
                 <ProtectedRoute>
                   <TaskManager />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/goals" 
+              element={
+                <ProtectedRoute>
+                  <PersonalGoalsPage />
                 </ProtectedRoute>
               }
             />
