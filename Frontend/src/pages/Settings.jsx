@@ -84,7 +84,6 @@ function Settings() {
         <h2 className="text-xl font-semibold mb-6 text-center">Settings</h2>
         
         <div className="space-y-6">
-          {/* Theme Selection */}
           <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-4">
             <h3 className="font-medium mb-3">Theme</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
@@ -112,7 +111,6 @@ function Settings() {
             </div>
           </div>
 
-          {/* Preferences */}
           <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-4">
             <h3 className="font-medium mb-4">Preferences</h3>
             
