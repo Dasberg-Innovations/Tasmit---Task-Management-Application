@@ -12,22 +12,56 @@ function Header() {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b">
-      <div className="flex justify-between items-center px-6 py-4">
-        <h1 className="text-xl font-bold text-gray-800">Habot App</h1>
-        <div className="flex items-center gap-4">
-          {user && (
-            <>
-              <span className="text-gray-600">Welcome, {user.username}</span>
-              <button
-                onClick={handleLogout}
-                className="font-['Noto_Sans'] text-[18px] text-white px-[20px] py-[10px] rounded-[20px] hover:bg-red-600 transition-colors duration-300 bg-red-500"
-              >
-                Logout
-              </button>
-            </>
-          )}
+    <header 
+      className="border-b transition-all duration-300"
+      style={{ 
+        backgroundColor: 'var(--background-color)', 
+        borderColor: 'color-mix(in srgb, var(--text-color) 10%, transparent)'
+      }}
+    >
+      <div className="flex justify-between items-center px-8 py-4">
+        <div className="flex items-center gap-3">
+          <h1 
+            className="text-xl font-semibold tracking-tight"
+            style={{ color: 'var(--text-color)' }}
+          >
+            HabotApp
+          </h1>
         </div>
+
+        {user && (
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium border"
+                style={{ 
+                  backgroundColor: 'color-mix(in srgb, var(--primary-color) 10%, transparent)',
+                  color: 'var(--primary-color)',
+                  borderColor: 'color-mix(in srgb, var(--primary-color) 30%, transparent)'
+                }}
+              >
+                {user.username.charAt(0).toUpperCase()}
+              </div>
+              <span 
+                className="font-medium text-sm"
+                style={{ color: 'var(--text-color)' }}
+              >
+                {user.username}
+              </span>
+            </div>
+            
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 hover:shadow-sm"
+              style={{ 
+                backgroundColor: 'var(--primary-color)',
+                color: 'white'
+              }}
+            >
+              Logout
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

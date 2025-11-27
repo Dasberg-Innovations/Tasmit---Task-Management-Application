@@ -8,14 +8,13 @@ const Sidebar = () => {
   return (
     <div className="flex flex-col w-1/4 h-full p-5 bg-white shadow-md">
       <h1 className="flex items-center gap-1 mb-6">
-        <span className="text-blue-600 text-2xl">📋</span>
         <span className="text-2xl font-bold">Menu</span>
       </h1>
       <div className="flex flex-col gap-5">
         <Link
           to="hero"
           className={`flex items-center gap-2 p-2 rounded-full text-gray-800 hover:bg-blue-200 ${path === "tasks" ? "bg-blue-700 text-white" : ""}`}
-        >Dashboard</Link>
+        >Hero Dashboard</Link>
         <Link
           to="tasks"
           className={`flex items-center gap-2 p-2 rounded-full text-gray-800 hover:bg-blue-200 ${path === "tasks" ? "bg-blue-700 text-white" : ""}`}
