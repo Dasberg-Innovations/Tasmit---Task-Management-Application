@@ -4,71 +4,65 @@ import axios from 'axios';
 
 const Calendar = () => {
   const { user } = useAuth();
-  const [current_month, set_current_month] = useState(new Date());
-  const [all_tasks, set_all_tasks] = useState([]);
-  const [selected_day, set_selected_day] = useState(null);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [allTasks, setAllTasks] = useState([]);
+  const [selectedDay, setSelectedDay] = useState(null);
 
   useEffect(() => {
     if (user) {
-      load_tasks();
+      loadTasks();
     }
   }, [user]);
 
-  const load_tasks = async () => {
+  const loadTasks = async () => {
     try {
-        const response = await axios.get(`http://localhost:5555/tasks/user/${user.id}`);
-        
-        const tasks_with_dates = response.data.map(task => {
-            let due_date;
-            if (task.Due_Date) {
-                const dateObj = new Date(task.Due_Date);
-                due_date = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
-            } else {
-                const created = new Date(task.createdAt);
-                due_date = new Date(created.getFullYear(), created.getMonth(), created.getDate());
-            }
-            
-            return {
-                ...task,
-                due_date: due_date
-            };
-        });
-        
-        set_all_tasks(tasks_with_dates);
+      const response = await axios.get(`http://localhost:5555/tasks/user/${user.id}`);
+      const tasksWithDates = response.data.map(task => {
+        let dueDate;
+        if (task.Due_Date) {
+          const dateObj = new Date(task.Due_Date);
+          dueDate = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
+        } else {
+          const created = new Date(task.createdAt);
+          dueDate = new Date(created.getFullYear(), created.getMonth(), created.getDate());
+        }
+        return {
+          ...task,
+          due_date: dueDate
+        };
+      });
+      setAllTasks(tasksWithDates);
     } catch (error) {
-        console.error('Error loading tasks:', error);
+      console.error('Error loading tasks:', error);
     }
-};
+  };
 
-  const get_total_days_in_month = (date) => {
+  const getDaysInMonth = (date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   };
 
-  const get_starting_weekday = (date) => {
+  const getFirstDayOfMonth = (date) => {
     return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
   };
 
-  const go_to_previous_month = () => {
-    set_current_month(new Date(current_month.getFullYear(), current_month.getMonth() - 1, 1));
+  const goToPreviousMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
   };
 
-  const go_to_next_month = () => {
-    set_current_month(new Date(current_month.getFullYear(), current_month.getMonth() + 1, 1));
+  const goToNextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
   };
 
-  const find_tasks_for_day = (day_date) => {
-    const day_start = new Date(day_date.getFullYear(), day_date.getMonth(), day_date.getDate());
-    
-    return all_tasks.filter(task => {
+  const findTasksForDay = (dayDate) => {
+    const dayStart = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate());
+    return allTasks.filter(task => {
       if (!task.due_date) return false;
-      
-      const task_day = new Date(task.due_date.getFullYear(), task.due_date.getMonth(), task.due_date.getDate());
-      
-      return task_day.getTime() === day_start.getTime();
+      const taskDay = new Date(task.due_date.getFullYear(), task.due_date.getMonth(), task.due_date.getDate());
+      return taskDay.getTime() === dayStart.getTime();
     });
   };
 
-  const is_current_day = (date) => {
+  const isToday = (date) => {
     const today = new Date();
     return (
       date.getDate() === today.getDate() &&
@@ -77,127 +71,115 @@ const Calendar = () => {
     );
   };
 
-  const build_calendar_grid = () => {
-    const total_days = get_total_days_in_month(current_month);
-    const start_day = get_starting_weekday(current_month);
-    const calendar_grid = [];
+  const buildCalendar = () => {
+    const daysInMonth = getDaysInMonth(currentMonth);
+    const firstDay = getFirstDayOfMonth(currentMonth);
+    const calendar = [];
 
-    for (let i = 0; i < start_day; i++) {
-      const date = new Date(current_month.getFullYear(), current_month.getMonth(), i - start_day + 1);
-      calendar_grid.push({
+    for (let i = 0; i < firstDay; i++) {
+      const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i - firstDay + 1);
+      calendar.push({
         date,
-        is_this_month: false,
+        isCurrentMonth: false,
         tasks: []
       });
     }
 
-    for (let day = 1; day <= total_days; day++) {
-      const date = new Date(current_month.getFullYear(), current_month.getMonth(), day);
-      const day_tasks = find_tasks_for_day(date);
-      calendar_grid.push({
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+      const dayTasks = findTasksForDay(date);
+      calendar.push({
         date,
-        is_this_month: true,
-        tasks: day_tasks
+        isCurrentMonth: true,
+        tasks: dayTasks
       });
     }
 
-    return calendar_grid;
+    return calendar;
   };
 
-  const calendar_grid = build_calendar_grid();
-  const month_names = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-  const day_labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const calendarDays = buildCalendar();
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold text-gray-800">Calendar</h1>
+    <div className="p-4 bg-white min-h-screen">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-light text-gray-900">Calendar</h1>
             <div className="flex items-center gap-4">
               <button
-                onClick={go_to_previous_month}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                onClick={goToPreviousMonth}
+                className="p-1 hover:bg-gray-100 rounded"
               >
-                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <h2 className="text-2xl font-semibold text-gray-700">
-                {month_names[current_month.getMonth()]} {current_month.getFullYear()}
+              <h2 className="text-lg font-normal text-gray-700">
+                {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
               </h2>
               <button
-                onClick={go_to_next_month}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                onClick={goToNextMonth}
+                className="p-1 hover:bg-gray-100 rounded"
               >
-                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
             </div>
           </div>
+        </div>
 
-          <div className="grid grid-cols-7 gap-2 mb-4">
-            {day_labels.map(day => (
-              <div key={day} className="text-center font-semibold text-gray-600 py-2">
+        <div className="border border-gray-200 rounded">
+          <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
+            {dayNames.map(day => (
+              <div key={day} className="text-center py-2 text-sm text-gray-600 font-medium">
                 {day}
               </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-7 gap-2">
-            {calendar_grid.map((day, index) => (
+          <div className="grid grid-cols-7">
+            {calendarDays.map((day, index) => (
               <div
                 key={index}
                 className={`
-                  min-h-32 p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer
-                  ${day.is_this_month 
-                    ? is_current_day(day.date) 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : 'border-gray-200 bg-white hover:border-gray-300'
-                    : 'border-gray-100 bg-gray-50'
-                  }
-                  ${selected_day && day.date.getTime() === selected_day.getTime() ? 'ring-2 ring-blue-500' : ''}
+                  min-h-24 p-2 border-r border-b border-gray-200
+                  ${day.isCurrentMonth ? 'bg-white' : 'bg-gray-50'}
+                  ${isToday(day.date) ? 'bg-blue-50' : ''}
+                  ${selectedDay && day.date.getTime() === selectedDay.getTime() ? 'ring-1 ring-blue-500' : ''}
+                  hover:bg-gray-50 cursor-pointer
                 `}
-                onClick={() => set_selected_day(day.date)}
+                onClick={() => setSelectedDay(day.date)}
               >
                 <div className={`
-                  text-sm font-semibold mb-2
-                  ${day.is_this_month 
-                    ? is_current_day(day.date) 
-                      ? 'text-blue-600' 
-                      : 'text-gray-700'
-                    : 'text-gray-400'
-                  }
+                  text-sm mb-1
+                  ${day.isCurrentMonth ? 'text-gray-900' : 'text-gray-400'}
+                  ${isToday(day.date) ? 'text-blue-600 font-medium' : ''}
                 `}>
                   {day.date.getDate()}
-                  {day.tasks.length > 0 && (
-                    <span className="ml-1 text-xs text-gray-500">({day.tasks.length})</span>
-                  )}
                 </div>
                 
                 <div className="space-y-1">
-                  {day.tasks.slice(0, 3).map((task, task_index) => (
+                  {day.tasks.slice(0, 2).map((task, taskIndex) => (
                     <div
-                      key={task_index}
+                      key={taskIndex}
                       className={`
                         text-xs p-1 rounded truncate
                         ${task.Task_Completed 
-                          ? 'bg-green-100 text-green-800 line-through' 
-                          : 'bg-blue-100 text-blue-800'
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-blue-100 text-blue-700'
                         }
                       `}
-                      title={task.Task_Title}
                     >
                       {task.Task_Title}
                     </div>
                   ))}
-                  {day.tasks.length > 3 && (
-                    <div className="text-xs text-gray-500 text-center">
-                      +{day.tasks.length - 3} more
+                  {day.tasks.length > 2 && (
+                    <div className="text-xs text-gray-500">
+                      +{day.tasks.length - 2} more
                     </div>
                   )}
                 </div>
@@ -206,44 +188,39 @@ const Calendar = () => {
           </div>
         </div>
 
-        {selected_day && (
-          <div className="bg-white rounded-2xl shadow-xl p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">
-              Tasks for {selected_day.toLocaleDateString('en-US', { 
+        {selectedDay && (
+          <div className="mt-6 border border-gray-200 rounded p-4">
+            <h3 className="text-lg font-normal text-gray-900 mb-3">
+              {selectedDay.toLocaleDateString('en-US', { 
                 weekday: 'long', 
                 year: 'numeric', 
                 month: 'long', 
                 day: 'numeric' 
               })}
             </h3>
-            <div className="space-y-3">
-              {find_tasks_for_day(selected_day).length === 0 ? (
-                <p className="text-gray-500 text-center py-4">No tasks due on this date</p>
+            <div className="space-y-2">
+              {findTasksForDay(selectedDay).length === 0 ? (
+                <p className="text-gray-500 text-center py-2">No tasks</p>
               ) : (
-                find_tasks_for_day(selected_day).map((task, index) => (
+                findTasksForDay(selectedDay).map((task, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200"
+                    className="flex items-center justify-between p-3 border border-gray-200 rounded"
                   >
-                    <div className="flex-1">
-                      <h4 className={`font-medium ${task.Task_Completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
+                    <div>
+                      <h4 className={`${task.Task_Completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
                         {task.Task_Title}
                       </h4>
-                      <p className="text-sm text-gray-600 mt-1">{task.Description}</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Due: {new Date(task.due_date).toLocaleDateString()} at {new Date(task.due_date).toLocaleTimeString()}
-                      </p>
+                      <p className="text-sm text-gray-600">{task.Description}</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`
-                        px-2 py-1 rounded-full text-xs font-medium
-                        ${task.Task_Completed 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-yellow-100 text-yellow-800'
-                        }
-                      `}>
-                        {task.Task_Completed ? 'Completed' : 'Pending'}
-                      </span>
+                    <div className={`
+                      px-2 py-1 text-xs rounded
+                      ${task.Task_Completed 
+                        ? 'bg-green-100 text-green-700' 
+                        : 'bg-yellow-100 text-yellow-700'
+                      }
+                    `}>
+                      {task.Task_Completed ? 'Done' : 'Todo'}
                     </div>
                   </div>
                 ))

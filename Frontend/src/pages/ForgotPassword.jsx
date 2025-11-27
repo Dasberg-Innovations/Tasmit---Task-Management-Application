@@ -4,7 +4,7 @@ import { loginUser } from '../../../Backend/Controllers/LoginController';
 import { useAuth } from '../components/AuthContext';
 import DesktopImage from '../../src/assets/Landing_Page.jpg';
 
-function Login() {
+function ForgotPassword() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -47,14 +47,6 @@ function Login() {
             className="p-2 mb-4 border border-gray-300 rounded"
             required
           />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="p-2 mb-4 border border-gray-300 rounded"
-            required
-          />
           <button
             type="submit"
             className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -68,7 +60,7 @@ function Login() {
         </p>
           <p className="mt-4 text-center">
           Forgot Password?{" "}
-          <Link to="/forgot-password" className="text-blue-500 hover:underline">Forgot Password</Link>
+          <Link to="/register" className="text-blue-500 hover:underline">Register</Link>
         </p>
       </div>
     </div>

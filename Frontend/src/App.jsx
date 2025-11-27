@@ -10,6 +10,7 @@ import Settings from "./pages/Settings";
 import TaskManager from "./pages/Tasks";
 import Calendar from "./pages/Calendar";
 import PersonalGoalsPage from "./pages/PersonalGoalsPage";
+import ForgotPassword from "./pages/ForgotPassword";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -65,6 +66,14 @@ const AppContent = () => {
               element={
                 <PublicRoute>
                   <Register />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <PublicRoute>
+                  <ForgotPassword />
                 </PublicRoute>
               }
             />
