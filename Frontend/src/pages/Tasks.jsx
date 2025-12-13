@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MdOutlineDone, MdModeEditOutline } from 'react-icons/md';
+import { MdOutlineDone, MdModeEditOutline, MdAdd, MdExpandMore, MdExpandLess } from 'react-icons/md';
 import { FaTrash } from 'react-icons/fa';
 import { IoClose } from 'react-icons/io5';
 import { useAuth } from '../components/AuthContext';
@@ -18,6 +18,9 @@ const TaskManager = () => {
     const [urgency, setUrgency] = useState('Medium');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [newSubTaskTitle, setNewSubTaskTitle] = useState('');
+    const [addingSubTaskId, setAddingSubTaskId] = useState(null);
+    const [expandedTasks, setExpandedTasks] = useState({});
 
     useEffect(() => {
         if (user) {
@@ -95,6 +98,11 @@ const TaskManager = () => {
     };
 
     const saveEdit = async (id) => {
+        if (!edited_text.trim() || !edited_description.trim()) {
+            alert('Please fill in all fields');
+            return;
+        }
+
         try {
             const response = await axios.put(`http://localhost:5555/tasks/${id}`, {
                 Task_Title: edited_text,
@@ -120,6 +128,65 @@ const TaskManager = () => {
         setIsModalOpen(false);
     };
 
+    const addSubTask = async (taskId) => {
+        if (!newSubTaskTitle.trim()) {
+            alert('Please enter a subtask title');
+            return;
+        }
+
+        try {
+            const response = await axios.post(`http://localhost:5555/tasks/${taskId}/subtasks`, {
+                title: newSubTaskTitle
+            });
+
+            setTasks(tasks.map((t) => t._id === taskId ? response.data : t));
+            setNewSubTaskTitle('');
+            setAddingSubTaskId(null);
+        } catch (error) {
+            console.error('Error adding subtask:', error);
+            alert('Failed to add subtask. Please try again.');
+        }
+    };
+
+    const toggleSubTask = async (taskId, subTaskId, completed) => {
+        try {
+            const response = await axios.put(`http://localhost:5555/tasks/${taskId}/subtasks/${subTaskId}`, {
+                completed: !completed
+            });
+
+            setTasks(tasks.map((t) => t._id === taskId ? response.data : t));
+        } catch (error) {
+            console.error('Error updating subtask:', error);
+        }
+    };
+
+    const deleteSubTask = async (taskId, subTaskId) => {
+        if (!window.confirm('Are you sure you want to delete this subtask?')) {
+            return;
+        }
+
+        try {
+            const response = await axios.delete(`http://localhost:5555/tasks/${taskId}/subtasks/${subTaskId}`);
+            setTasks(tasks.map((t) => t._id === taskId ? response.data : t));
+        } catch (error) {
+            console.error('Error deleting subtask:', error);
+            alert('Failed to delete subtask. Please try again.');
+        }
+    };
+
+    const toggleExpandTask = (taskId) => {
+        setExpandedTasks(prev => ({
+            ...prev,
+            [taskId]: !prev[taskId]
+        }));
+    };
+
+    const calculateProgress = (task) => {
+        if (!task.subTasks || task.subTasks.length === 0) return 0;
+        const completed = task.subTasks.filter(sub => sub.completed).length;
+        return (completed / task.subTasks.length) * 100;
+    };
+
     return (
         <div className="flex flex-col min-h-screen bg-gray-100 p-4">
             <button 
@@ -142,6 +209,12 @@ const TaskManager = () => {
                                 <div className="flex flex-col flex-1">
                                     <div className="flex items-center gap-2">
                                         <button
+                                            onClick={() => toggleExpandTask(task._id)}
+                                            className="text-gray-500 hover:text-gray-700"
+                                        >
+                                            {expandedTasks[task._id] ? <MdExpandLess size={20} /> : <MdExpandMore size={20} />}
+                                        </button>
+                                        <button
                                             onClick={() => toggleTask(task._id)}
                                             className={`h-6 w-6 border rounded-full flex items-center justify-center transition-colors ${
                                                 task.Task_Completed 
@@ -155,12 +228,28 @@ const TaskManager = () => {
                                             {task.Task_Title}
                                         </span>
                                     </div>
-                                    <span className="text-sm text-gray-600 mt-1 ml-8">
+                                    <span className="text-sm text-gray-600 mt-1 ml-7">
                                         {task.Description}
                                     </span>
-                                    <div className="text-xs text-gray-500 mt-1 ml-8">
+                                    <div className="text-xs text-gray-500 mt-1 ml-7">
                                         Priority: {task.Priority} | Urgency: {task.Urgency} | Due: {new Date(task.Due_Date).toLocaleDateString()}
                                     </div>
+                                    
+                                    {/* Progress Bar */}
+                                    {task.subTasks && task.subTasks.length > 0 && (
+                                        <div className="mt-2 ml-7">
+                                            <div className="flex justify-between text-xs text-gray-500 mb-1">
+                                                <span>Progress</span>
+                                                <span>{Math.round(calculateProgress(task))}%</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                                <div 
+                                                    className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                                                    style={{ width: `${calculateProgress(task)}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex gap-x-2 ml-4">
                                     <button
@@ -177,6 +266,86 @@ const TaskManager = () => {
                                     </button>
                                 </div>
                             </div>
+
+                            {/* Subtasks Section */}
+                            {expandedTasks[task._id] && (
+                                <div className="mt-4 ml-7 border-t pt-4">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h4 className="font-medium text-gray-700">Subtasks</h4>
+                                        <button
+                                            onClick={() => setAddingSubTaskId(task._id)}
+                                            className="flex items-center gap-1 text-sm bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md transition-colors"
+                                        >
+                                            <MdAdd size={16} />
+                                            Add Subtask
+                                        </button>
+                                    </div>
+
+                                    {/* Add Subtask Form */}
+                                    {addingSubTaskId === task._id && (
+                                        <div className="flex gap-2 mb-3">
+                                            <input
+                                                type="text"
+                                                value={newSubTaskTitle}
+                                                onChange={(e) => setNewSubTaskTitle(e.target.value)}
+                                                placeholder="Enter subtask title"
+                                                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-green-500"
+                                                autoFocus
+                                            />
+                                            <button
+                                                onClick={() => addSubTask(task._id)}
+                                                className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm transition-colors"
+                                            >
+                                                Add
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setAddingSubTaskId(null);
+                                                    setNewSubTaskTitle('');
+                                                }}
+                                                className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-3 py-2 rounded-md text-sm transition-colors"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Subtasks List */}
+                                    <div className="space-y-2">
+                                        {task.subTasks && task.subTasks.length > 0 ? (
+                                            task.subTasks.map((subTask) => (
+                                                <div key={subTask._id} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+                                                    <div className="flex items-center gap-3 flex-1">
+                                                        <button
+                                                            onClick={() => toggleSubTask(task._id, subTask._id, subTask.completed)}
+                                                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                                                                subTask.completed 
+                                                                    ? 'bg-green-500 border-green-500 text-white' 
+                                                                    : 'border-gray-300 hover:border-green-500'
+                                                            }`}
+                                                        >
+                                                            {subTask.completed && <MdOutlineDone size={14} />}
+                                                        </button>
+                                                        <span className={`flex-1 ${subTask.completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>
+                                                            {subTask.title}
+                                                        </span>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => deleteSubTask(task._id, subTask._id)}
+                                                        className="text-red-400 hover:text-red-600 transition-colors ml-2"
+                                                    >
+                                                        <FaTrash size={14} />
+                                                    </button>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="text-center text-gray-400 py-4">
+                                                No subtasks yet. Add your first subtask!
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ))
                 )}
