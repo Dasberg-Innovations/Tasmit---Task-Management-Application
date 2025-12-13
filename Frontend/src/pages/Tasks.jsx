@@ -29,17 +29,13 @@ const TaskManager = () => {
     }, [user]);
 
     const fetchTasks = async () => {
-    try {
-        const response = await axios.get(`http://localhost:5555/tasks/user/${user.id}`);
-        const tasksWithSubTasks = response.data.map(task => ({
-            ...task,
-            subTasks: task.SubTasks || [] 
-        }));
-        setTasks(tasksWithSubTasks);
-    } catch (error) {
-        console.error('Error fetching tasks:', error);
-    }
-};
+        try {
+            const response = await axios.get(`http://localhost:5555/tasks/user/${user.id}`);
+            setTasks(response.data);
+        } catch (error) {
+            console.error('Error fetching tasks:', error);
+        }
+    };
 
     const addTask = async (e) => {
         e.preventDefault();
@@ -47,7 +43,7 @@ const TaskManager = () => {
 
         setLoading(true);
         try {
-            let due_date_to_send = due_date ? new Date(due_date + 'T00:00:00').toISOString() : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+            let due_date_to_send = due_date ? new Date(due_date + 'T00:00:00').toISOString() : null;
 
             const response = await axios.post('http://localhost:5555/tasks', {
                 userId: user.id,
@@ -186,9 +182,9 @@ const TaskManager = () => {
     };
 
     const calculateProgress = (task) => {
-        if (!task.subTasks || task.subTasks.length === 0) return 0;
-        const completed = task.subTasks.filter(sub => sub.completed).length;
-        return (completed / task.subTasks.length) * 100;
+        if (!task.SubTasks || task.SubTasks.length === 0) return 0;
+        const completed = task.SubTasks.filter(sub => sub.completed).length;
+        return (completed / task.SubTasks.length) * 100;
     };
 
     return (
@@ -240,7 +236,7 @@ const TaskManager = () => {
                                     </div>
                                     
                                     {/* Progress Bar */}
-                                    {task.subTasks && task.subTasks.length > 0 && (
+                                    {task.SubTasks && task.SubTasks.length > 0 && (
                                         <div className="mt-2 ml-7">
                                             <div className="flex justify-between text-xs text-gray-500 mb-1">
                                                 <span>Progress</span>
@@ -316,8 +312,8 @@ const TaskManager = () => {
 
                                     {/* Subtasks List */}
                                     <div className="space-y-2">
-                                        {task.subTasks && task.subTasks.length > 0 ? (
-                                            task.subTasks.map((subTask) => (
+                                        {task.SubTasks && task.SubTasks.length > 0 ? (
+                                            task.SubTasks.map((subTask) => (
                                                 <div key={subTask._id} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
                                                     <div className="flex items-center gap-3 flex-1">
                                                         <button
@@ -407,7 +403,6 @@ const TaskManager = () => {
                                     value={due_date}
                                     onChange={(e) => setDueDate(e.target.value)}
                                     className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    required
                                 />
                             </div>
                             <div className="flex space-x-2">

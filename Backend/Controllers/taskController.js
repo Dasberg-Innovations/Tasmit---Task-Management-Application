@@ -188,12 +188,13 @@ const deleteSubTask = async (req, res) => {
             return res.status(404).json({ message: 'Task not found' });
         }
 
-        const SubTask = task.SubTasks.id(subTaskId);
-        if (!SubTask) {
+        const subTaskIndex = task.SubTasks.findIndex(subTask => subTask._id.toString() === subTaskId);
+        if (subTaskIndex === -1) {
             return res.status(404).json({ message: 'Subtask not found' });
         }
 
-        SubTask.deleteOne();
+        task.SubTasks.splice(subTaskIndex, 1);
+        
         const updatedTask = await task.save();
         await updatedTask.populate('user', 'username email');
         res.json(updatedTask);

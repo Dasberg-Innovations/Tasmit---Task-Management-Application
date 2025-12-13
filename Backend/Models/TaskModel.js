@@ -1,18 +1,16 @@
 import mongoose from "mongoose";
 
-const SubTaskSchema = new mongoose.Schema(
-    {
-        title: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-        completed: {
-            type: Boolean,
-            default: false
-        }
+const SubTaskSchema = new mongoose.Schema({
+    title: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    completed: {
+        type: Boolean,
+        default: false
     }
-);
+});
 
 const TaskSchema = new mongoose.Schema(
     {
