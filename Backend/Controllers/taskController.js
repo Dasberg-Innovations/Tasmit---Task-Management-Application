@@ -141,7 +141,11 @@ const addSubTask = async (req, res) => {
         task.SubTasks.push(newSubTask);
         const updatedTask = await task.save();
         await updatedTask.populate('user', 'username email');
-        res.json(updatedTask);
+        
+        res.json({
+            ...updatedTask.toObject(),
+            SubTasks: updatedTask.SubTasks
+        });
     } catch (err) {
         console.error('Error adding subtask:', err);
         res.status(400).json({ message: err.message });

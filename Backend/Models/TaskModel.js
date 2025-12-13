@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const SubTaskSchema = mongoose.Schema(
+const SubTaskSchema = new mongoose.Schema(
     {
         title: {
             type: String,
@@ -11,13 +11,10 @@ const SubTaskSchema = mongoose.Schema(
             type: Boolean,
             default: false
         }
-    },
-    {
-        timestamps: true
     }
 );
 
-const TaskSchema = mongoose.Schema(
+const TaskSchema = new mongoose.Schema(
     {
         user: {
             type: mongoose.Schema.Types.ObjectId,

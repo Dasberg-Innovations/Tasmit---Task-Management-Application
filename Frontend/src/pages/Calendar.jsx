@@ -103,12 +103,12 @@ const Calendar = () => {
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <div className="p-4 bg-white min-h-screen">
+    <div className="p-4 min-h-screen">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-light text-gray-900">Calendar</h1>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1">
               <button
                 onClick={goToPreviousMonth}
                 className="p-1 hover:bg-gray-100 rounded"

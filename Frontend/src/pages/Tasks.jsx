@@ -29,13 +29,17 @@ const TaskManager = () => {
     }, [user]);
 
     const fetchTasks = async () => {
-        try {
-            const response = await axios.get(`http://localhost:5555/tasks/user/${user.id}`);
-            setTasks(response.data);
-        } catch (error) {
-            console.error('Error fetching tasks:', error);
-        }
-    };
+    try {
+        const response = await axios.get(`http://localhost:5555/tasks/user/${user.id}`);
+        const tasksWithSubTasks = response.data.map(task => ({
+            ...task,
+            subTasks: task.SubTasks || [] 
+        }));
+        setTasks(tasksWithSubTasks);
+    } catch (error) {
+        console.error('Error fetching tasks:', error);
+    }
+};
 
     const addTask = async (e) => {
         e.preventDefault();
