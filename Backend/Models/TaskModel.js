@@ -1,5 +1,22 @@
 import mongoose from "mongoose";
 
+const SubTaskSchema = mongoose.Schema(
+    {
+        title: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        completed: {
+            type: Boolean,
+            default: false
+        }
+    },
+    {
+        timestamps: true
+    }
+);
+
 const TaskSchema = mongoose.Schema(
     {
         user: {
@@ -33,7 +50,8 @@ const TaskSchema = mongoose.Schema(
             type: String,
             enum: ['Low', 'Medium', 'High'],
             default: 'Medium'
-        }
+        },
+        SubTasks: [SubTaskSchema] 
     },
     {
         timestamps: true

@@ -19,7 +19,7 @@ const getAllTasks = async (req, res) => {
 
 const createTask = async (req, res) => {
     try {
-         const { userId, Task_Title, Description, Task_Completed, Due_Date, Priority, Urgency } = req.body;
+         const { userId, Task_Title, Description, Task_Completed, Due_Date, Priority, Urgency, SubTasks } = req.body;
 
         if (!userId || !Task_Title || !Description) {
             return res.status(400).json({ 
@@ -48,7 +48,8 @@ const createTask = async (req, res) => {
             Task_Completed: Task_Completed || false,
             Due_Date: dueDate,
             Priority: Priority || 'Medium',
-            Urgency: Urgency || 'Medium'
+            Urgency: Urgency || 'Medium',
+            SubTasks: SubTasks || [] 
         });
 
         const newTask = await task.save();
@@ -118,6 +119,85 @@ const deleteTask = async (req, res) => {
     }
 };
 
-export {
-    getAllTasks, createTask, getTasksByUser, getTaskById, updateTask, deleteTask
+const addSubTask = async (req, res) => {
+    try {
+        const { taskId } = req.params;
+        const { title } = req.body;
+
+        if (!title) {
+            return res.status(400).json({ message: 'Subtask title is required' });
+        }
+
+        const task = await Task.findById(taskId);
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+
+        const newSubTask = {
+            title,
+            completed: false
+        };
+
+        task.SubTasks.push(newSubTask);
+        const updatedTask = await task.save();
+        await updatedTask.populate('user', 'username email');
+        res.json(updatedTask);
+    } catch (err) {
+        console.error('Error adding subtask:', err);
+        res.status(400).json({ message: err.message });
+    }
+};
+
+const updateSubTask = async (req, res) => {
+    try {
+        const { taskId, subTaskId } = req.params;
+        const { completed, title } = req.body;
+
+        const task = await Task.findById(taskId);
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+
+        const SubTask = task.SubTasks.id(subTaskId);
+        if (!SubTask) {
+            return res.status(404).json({ message: 'Subtask not found' });
+        }
+
+        if (completed !== undefined) SubTask.completed = completed;
+        if (title !== undefined) SubTask.title = title;
+
+        const updatedTask = await task.save();
+        await updatedTask.populate('user', 'username email');
+        res.json(updatedTask);
+    } catch (err) {
+        console.error('Error updating subtask:', err);
+        res.status(400).json({ message: err.message });
+    }
+};
+
+const deleteSubTask = async (req, res) => {
+    try {
+        const { taskId, subTaskId } = req.params;
+
+        const task = await Task.findById(taskId);
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+
+        const SubTask = task.SubTasks.id(subTaskId);
+        if (!SubTask) {
+            return res.status(404).json({ message: 'Subtask not found' });
+        }
+
+        SubTask.deleteOne();
+        const updatedTask = await task.save();
+        await updatedTask.populate('user', 'username email');
+        res.json(updatedTask);
+    } catch (err) {
+        console.error('Error deleting subtask:', err);
+        res.status(400).json({ message: err.message });
+    }
+};
+
+export {getAllTasks, createTask, getTasksByUser, getTaskById, updateTask, deleteTask, addSubTask, updateSubTask, deleteSubTask
 };

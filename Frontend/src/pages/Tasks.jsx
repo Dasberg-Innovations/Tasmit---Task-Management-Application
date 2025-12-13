@@ -11,11 +11,13 @@ const TaskManager = () => {
     const [tasks, setTasks] = useState([]);
     const [editing_task, setEditingTask] = useState(null);
     const [edited_text, setEditedText] = useState('');
+    const [edited_description, setEditedDescription] = useState('');
     const { user } = useAuth();
     const [due_date, setDueDate] = useState('');
     const [priority, setPriority] = useState('Medium');
     const [urgency, setUrgency] = useState('Medium');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -36,6 +38,7 @@ const TaskManager = () => {
         e.preventDefault();
         if (!new_task || !new_description || !user) return;
 
+        setLoading(true);
         try {
             let due_date_to_send = due_date ? new Date(due_date + 'T00:00:00').toISOString() : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -52,6 +55,9 @@ const TaskManager = () => {
             resetForm();
         } catch (error) {
             console.error('Error creating task:', error);
+            alert(`Failed to add task: ${error.response?.data?.message || error.message}`);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -69,32 +75,39 @@ const TaskManager = () => {
     };
 
     const deleteTask = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this task?')) {
+            return;
+        }
+
         try {
             await axios.delete(`http://localhost:5555/tasks/${id}`);
             setTasks(tasks.filter((t) => t._id !== id));
         } catch (error) {
             console.error('Error deleting task:', error);
+            alert('Failed to delete task. Please try again.');
         }
     };
 
     const startEditing = (task) => {
         setEditingTask(task._id);
         setEditedText(task.Task_Title);
+        setEditedDescription(task.Description);
     };
 
     const saveEdit = async (id) => {
         try {
             const response = await axios.put(`http://localhost:5555/tasks/${id}`, {
                 Task_Title: edited_text,
-                Priority,
-                Urgency
+                Description: edited_description
             });
 
             setTasks(tasks.map((t) => t._id === id ? response.data : t));
             setEditingTask(null);
             setEditedText('');
+            setEditedDescription('');
         } catch (error) {
             console.error('Error updating task:', error);
+            alert('Failed to update task. Please try again.');
         }
     };
 
@@ -104,104 +117,131 @@ const TaskManager = () => {
         setDueDate('');
         setPriority('Medium');
         setUrgency('Medium');
-    };
-
-    const grouped_tasks = tasks.reduce((groups, task) => {
-        const date = new Date(task.Due_Date).toLocaleDateString();
-        if (!groups[date]) {
-            groups[date] = [];
-        }
-        groups[date].push(task);
-        return groups;
-    }, {});
-
-    const toggleModal = () => {
-        setIsModalOpen(!isModalOpen);
+        setIsModalOpen(false);
     };
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-100 p-4">
             <button 
-                onClick={toggleModal} 
-                className="mb-4 bg-blue-500 text-white px-4 py-2 rounded-md"
+                onClick={() => setIsModalOpen(true)} 
+                className="mb-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
+                disabled={loading}
             >
-                Add Task
+                {loading ? 'Adding...' : 'Add Task'}
             </button>
 
             <div className="flex flex-col space-y-4 w-full">
-                {tasks.map(task => (
-                    <div key={task._id} className="flex flex-col bg-white rounded-lg shadow-md p-4 w-full">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-x-4">
-                                <button
-                                    onClick={() => toggleTask(task._id)}
-                                    className={`h-6 w-6 border rounded-full flex items-center justify-center ${task.Task_Completed ? "bg-green-500 border-green-500" : "border-gray-300 hover:border-blue-400"}`}
-                                >
-                                    {task.Task_Completed && <MdOutlineDone className="text-white" />}
-                                </button>
-                                <div className="flex flex-col">
-                                    <span className={`text-gray-800 truncate ${task.Task_Completed ? 'line-through' : ''}`}>
-                                        {task.Task_Title} (Priority: {task.Priority}, Urgency: {task.Urgency})
-                                    </span>
-                                    <span className="text-sm text-gray-600">
+                {tasks.length === 0 ? (
+                    <div className="text-center text-gray-500 py-8">
+                        No tasks yet. Add your first task!
+                    </div>
+                ) : (
+                    tasks.map(task => (
+                        <div key={task._id} className="flex flex-col bg-white rounded-lg shadow-md p-4 w-full">
+                            <div className="flex items-center justify-between">
+                                <div className="flex flex-col flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => toggleTask(task._id)}
+                                            className={`h-6 w-6 border rounded-full flex items-center justify-center transition-colors ${
+                                                task.Task_Completed 
+                                                    ? "bg-green-500 border-green-500" 
+                                                    : "border-gray-300 hover:border-green-500"
+                                            }`}
+                                        >
+                                            {task.Task_Completed && <MdOutlineDone className="text-white" size={14} />}
+                                        </button>
+                                        <span className={`text-lg font-semibold ${task.Task_Completed ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+                                            {task.Task_Title}
+                                        </span>
+                                    </div>
+                                    <span className="text-sm text-gray-600 mt-1 ml-8">
                                         {task.Description}
                                     </span>
+                                    <div className="text-xs text-gray-500 mt-1 ml-8">
+                                        Priority: {task.Priority} | Urgency: {task.Urgency} | Due: {new Date(task.Due_Date).toLocaleDateString()}
+                                    </div>
+                                </div>
+                                <div className="flex gap-x-2 ml-4">
+                                    <button
+                                        className="p-2 text-blue-500 hover:text-blue-700 rounded-lg transition-colors"
+                                        onClick={() => startEditing(task)}
+                                    >
+                                        <MdModeEditOutline />
+                                    </button>
+                                    <button
+                                        onClick={() => deleteTask(task._id)}
+                                        className="p-2 text-red-500 hover:text-red-700 rounded-lg transition-colors"
+                                    >
+                                        <FaTrash />
+                                    </button>
                                 </div>
                             </div>
-                            <div className="flex gap-x-2">
-                                <button
-                                    className="p-2 text-blue-500 hover:text-blue-700 rounded-lg"
-                                    onClick={() => startEditing(task)}
-                                >
-                                    <MdModeEditOutline />
-                                </button>
-                                <button
-                                    onClick={() => deleteTask(task._id)}
-                                    className="p-2 text-red-500 hover:text-red-700 rounded-lg"
-                                >
-                                    <FaTrash />
-                                </button>
-                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
 
+            {/* Add Task Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white rounded-lg shadow-lg p-8 w-96">
-                        <h1 className="text-2xl font-bold text-gray-800 mb-4">Add Task</h1>
-                        <button onClick={toggleModal} className="absolute top-2 right-2 text-gray-600">
-                            <IoClose size={24} />
-                        </button>
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-white rounded-lg shadow-lg p-6 w-96 max-w-full mx-4">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-gray-800">Add New Task</h2>
+                            <button 
+                                onClick={() => setIsModalOpen(false)} 
+                                className="text-gray-500 hover:text-gray-700 transition-colors"
+                                disabled={loading}
+                            >
+                                <IoClose size={24} />
+                            </button>
+                        </div>
                         <form onSubmit={addTask} className="flex flex-col space-y-4">
-                            <input
-                                className="border border-gray-300 rounded-lg px-4 py-2 outline-none"
-                                type="text"
-                                value={new_task}
-                                onChange={(e) => setNewTask(e.target.value)}
-                                placeholder="Task Title"
-                                required
-                            />
-                            <textarea
-                                className="border border-gray-300 rounded-lg px-4 py-2 outline-none"
-                                value={new_description}
-                                onChange={(e) => setNewDescription(e.target.value)}
-                                placeholder="Task Description"
-                                required
-                            />
-                            <input
-                                type="date"
-                                value={due_date}
-                                onChange={(e) => setDueDate(e.target.value)}
-                                className="border border-gray-300 rounded-lg px-4 py-2 outline-none"
-                                required
-                            />
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Task Title
+                                </label>
+                                <input
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    type="text"
+                                    value={new_task}
+                                    onChange={(e) => setNewTask(e.target.value)}
+                                    placeholder="Enter task title"
+                                    required
+                                    disabled={loading}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Description
+                                </label>
+                                <textarea
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    value={new_description}
+                                    onChange={(e) => setNewDescription(e.target.value)}
+                                    placeholder="Enter task description"
+                                    rows="3"
+                                    required
+                                    disabled={loading}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Due Date
+                                </label>
+                                <input
+                                    type="date"
+                                    value={due_date}
+                                    onChange={(e) => setDueDate(e.target.value)}
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    required
+                                />
+                            </div>
                             <div className="flex space-x-2">
                                 <select
                                     value={priority}
                                     onChange={(e) => setPriority(e.target.value)}
-                                    className="border border-gray-300 rounded-lg p-2"
+                                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 >
                                     <option value="Low">Low Priority</option>
                                     <option value="Medium">Medium Priority</option>
@@ -211,19 +251,93 @@ const TaskManager = () => {
                                 <select
                                     value={urgency}
                                     onChange={(e) => setUrgency(e.target.value)}
-                                    className="border border-gray-300 rounded-lg p-2"
+                                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 >
                                     <option value="Low">Low Urgency</option>
                                     <option value="Medium">Medium Urgency</option>
                                     <option value="High">High Urgency</option>
                                 </select>
                             </div>
-                            <button
-                                type="submit"
-                                className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                            <div className="flex gap-2 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition-colors"
+                                    disabled={loading}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors disabled:opacity-50"
+                                    disabled={loading}
+                                >
+                                    {loading ? 'Adding...' : 'Add Task'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Task Modal */}
+            {editing_task && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-white rounded-lg shadow-lg p-6 w-96 max-w-full mx-4">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-gray-800">Edit Task</h2>
+                            <button 
+                                onClick={() => setEditingTask(null)} 
+                                className="text-gray-500 hover:text-gray-700 transition-colors"
                             >
-                                Add Task
+                                <IoClose size={24} />
                             </button>
+                        </div>
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            saveEdit(editing_task);
+                        }} className="flex flex-col space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Task Title
+                                </label>
+                                <input
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    type="text"
+                                    value={edited_text}
+                                    onChange={(e) => setEditedText(e.target.value)}
+                                    placeholder="Enter task title"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Description
+                                </label>
+                                <textarea
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    value={edited_description}
+                                    onChange={(e) => setEditedDescription(e.target.value)}
+                                    placeholder="Enter task description"
+                                    rows="3"
+                                    required
+                                />
+                            </div>
+                            <div className="flex gap-2 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setEditingTask(null)}
+                                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
+                                >
+                                    Update Task
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>

@@ -63,7 +63,7 @@ export default function HeroPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen bg-gradient-to-br from-[#1e1e2f] to-[#2e2e4f] text-white font-sans p-10 gap-10 md:flex-row md:p-5 items-center justify-center">
+      <div className="flex h-screen bg-gradient-to-br from-[#1e1e2f] to-[#2e2e4f] text-gray font-sans p-10 gap-10 md:flex-row md:p-5 items-center justify-center">
         <div className="text-xl">Loading your dashboard...</div>
       </div>
     );
@@ -79,30 +79,30 @@ export default function HeroPage() {
         <div className="grid grid-cols-2 gap-4 w-full max-w-md">
           <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-green-400">{goals.length}</div>
-            <div className="text-sm text-gray-300">Total Goals</div>
+            <div className="text-sm text-gray-700">Total Goals</div>
           </div>
           <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-blue-400">{tasks.length}</div>
-            <div className="text-sm text-gray-300">Total Tasks</div>
+            <div className="text-sm text-gray-700">Total Tasks</div>
           </div>
           <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-yellow-400">
               {getCompletedTasksCount()}
             </div>
-            <div className="text-sm text-gray-300">Completed Tasks</div>
+            <div className="text-sm text-gray-700">Completed Tasks</div>
           </div>
           <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-purple-400">
               {Math.round(calculateOverallProgress())}%
             </div>
-            <div className="text-sm text-gray-300">Overall Progress</div>
+            <div className="text-sm text-gray-700">Overall Progress</div>
           </div>
         </div>
       </div>
 
       {/* Right side - Goals + Tasks */}
       <div className="flex-1 flex flex-col gap-8">
-        {/* Goals Section */}
+        {/* Goals Section - Customization */}
         <div className="goals-section bg-black bg-opacity-20 backdrop-blur-md p-6 rounded-xl">
           <h2 className="text-2xl font-bold mb-4 text-white">Your Goals Progress</h2>
           {goals.length === 0 ? (
@@ -119,22 +119,22 @@ export default function HeroPage() {
                 return (
                   <div key={goal._id} className="bg-white bg-opacity-10 rounded-lg p-4">
                     <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-semibold text-white truncate">{goal.Goal_Aim}</h3>
+                      <h3 className="font-semibold text-gray-800 truncate">{goal.Goal_Aim}</h3>
                       <span className="text-sm text-gray-300 bg-black bg-opacity-30 px-2 py-1 rounded">
                         {Math.round(progress)}%
                       </span>
                     </div>
-                    <p className="text-sm text-gray-300 mb-3 truncate">{goal.Description}</p>
+                    <p className="text-sm text-gray-700 mb-3 truncate">{goal.Description}</p>
                     <div className="w-full bg-gray-700 rounded-full h-2">
                       <div 
                         className="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full transition-all duration-500"
                         style={{ width: `${progress}%` }}
                       ></div>
                     </div>
-                    <div className="flex justify-between text-xs text-gray-400 mt-1">
+                    <div className="flex justify-between text-xs text-gray-700 mt-1">
                       <span>
                         {goal.subGoals ? goal.subGoals.filter(sub => sub.completed).length : 0}/
-                        {goal.subGoals ? goal.subGoals.length : 0} subgoals
+                        {goal.subGoals ? goal.subGoals.length : 0} Sub Goals Done
                       </span>
                       <span>{goal.Goal_Completed ? "Completed" : "In Progress"}</span>
                     </div>
@@ -144,10 +144,10 @@ export default function HeroPage() {
             </div>
           )}
         </div>
-
+      {/* Recent Tasks Section - Customization */}
         <div className="tasks-section bg-black bg-opacity-20 backdrop-blur-md p-6 rounded-xl">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-white">Recent Tasks</h2>
+            <h2 className="text-2xl font-bold text-gray-">Recent Tasks</h2>
             <span className="text-sm text-gray-300 bg-black bg-opacity-30 px-3 py-1 rounded-full">
               {getCompletedTasksCount()}/{tasks.length} completed
             </span>
@@ -167,7 +167,7 @@ export default function HeroPage() {
                       new Date(task.Due_Date) < new Date() ? 'bg-red-400' : 'bg-yellow-400'
                     }`}></div>
                     <div>
-                      <div className={`font-medium ${task.Task_Completed ? 'line-through text-gray-400' : 'text-white'}`}>
+                      <div className={`font-medium ${task.Task_Completed ? 'line-through text-gray-400' : 'text-gray-800'}`}>
                         {task.Task_Title}
                       </div>
                       <div className="text-xs text-gray-400">
