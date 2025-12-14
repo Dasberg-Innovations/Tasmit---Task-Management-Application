@@ -132,7 +132,7 @@ function Settings() {
   };
 
   return (
-    <div className="p-6 bg-white dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen flex items-center justify-center">
+    <div className="p-6 bg-[#d4a5a5] dark:text-white min-h-screen flex items-center justify-center">
       <div className="w-full max-w-2xl">
         <h2 className="text-xl font-semibold mb-6 text-center">Settings</h2>
         

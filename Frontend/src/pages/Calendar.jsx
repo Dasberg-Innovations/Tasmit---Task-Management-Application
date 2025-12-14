@@ -74,8 +74,8 @@ const Calendar = () => {
   };
 
   return (
-    <div className="p-4 min-h-screen">
-      <div className="max-w-4xl mx-auto">
+    <div className="p-4 min-h-screen bg-[#94b4cc]">
+      <div className="mt-5 max-w-4xl mx-auto">
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-light text-gray-900">Calendar</h1>
@@ -97,8 +97,8 @@ const Calendar = () => {
           </div>
         </div>
 
-        <div className="border border-gray-20 rounded">
-          <div className="grid grid-cols-7 bg-sky-600 border-b border-gray-200">
+        <div className="rounded">
+          <div className="grid grid-cols-7 bg-sky-600 ">
             {dayNames.map(day => (
               <div key={day} className="text-center py-2 text-sm text-white font-medium">
                 {day}

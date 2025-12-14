@@ -1,9 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import { MdOutlineDone, MdModeEditOutline, MdAdd, MdExpandMore, MdExpandLess } from 'react-icons/md';
-import { FaTrash } from 'react-icons/fa';
+import { MdOutlineDone, MdAdd, MdExpandMore, MdExpandLess } from 'react-icons/md';
+import { FaTrashAlt, FaEdit } from 'react-icons/fa';
+
 import { IoClose } from 'react-icons/io5';
 import { useAuth } from '../components/AuthContext';
+
+const Modal = ({ title, isOpen, onClose, children }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-96 max-w-full mx-4">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold text-gray-800">{title}</h2>
+                    <button
+                        onClick={onClose}
+                        className="text-gray-500 hover:text-gray-700 transition-colors"
+                        type="button"
+                    >
+                        <IoClose size={24} />
+                    </button>
+                </div>
+                {children}
+            </div>
+        </div>
+    );
+};
 
 const PersonalGoalsPage = () => {
     const { user } = useAuth();
@@ -43,7 +66,7 @@ const PersonalGoalsPage = () => {
                 Description: newGoal.description,
                 Goal_Completed: false
             });
-            
+
             setGoals(prev => [...prev, response.data]);
             resetForm();
         } catch (error) {
@@ -51,6 +74,19 @@ const PersonalGoalsPage = () => {
             alert(`Failed to add goal: ${error.response?.data?.message || error.message}`);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const toggleGoal = async (id) => {
+        try {
+            const goal = goals.find(g => g._id === id);
+            const response = await axios.put(`http://localhost:5555/goals/${id}`, {
+                Goal_Completed: !goal.Goal_Completed
+            });
+
+            setGoals(goals.map(g => g._id === id ? response.data : g));
+        } catch (error) {
+            console.error('Error updating goal:', error);
         }
     };
 
@@ -144,39 +180,280 @@ const PersonalGoalsPage = () => {
         setExpandedGoals(prev => ({ ...prev, [goalId]: !prev[goalId] }));
     };
 
-    const Modal = ({ title, isOpen, onClose, children }) => {
-        if (!isOpen) return null;
-        
+    // Memoized event handlers
+    const handleNewGoalChange = useCallback((field, value) => {
+        setNewGoal(prev => ({ ...prev, [field]: value }));
+    }, []);
+
+    const handleEditGoalChange = useCallback((field, value) => {
+        setEditGoal(prev => ({ ...prev, [field]: value }));
+    }, []);
+
+    const handleNewSubGoalChange = useCallback((value) => {
+        setNewSubGoal(prev => ({ ...prev, title: value }));
+    }, []);
+
+    const AddGoalForm = useCallback(() => (
+        <form onSubmit={addGoal} className="flex flex-col space-y-4">
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Goal Title</label>
+                <input
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    type="text"
+                    value={newGoal.aim}
+                    onChange={(e) => handleNewGoalChange('aim', e.target.value)}
+                    placeholder="Enter goal title"
+                    required
+                    disabled={loading}
+                    autoFocus
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={newGoal.description}
+                    onChange={(e) => handleNewGoalChange('description', e.target.value)}
+                    placeholder="Enter goal description"
+                    rows="3"
+                    required
+                    disabled={loading}
+                />
+            </div>
+            <div className="flex gap-2 pt-2">
+                <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition-colors"
+                    disabled={loading}
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors disabled:opacity-50"
+                    disabled={loading}
+                >
+                    {loading ? 'Adding...' : 'Add Goal'}
+                </button>
+            </div>
+        </form>
+    ), [newGoal, loading, handleNewGoalChange]);
+
+    const EditGoalForm = useCallback(() => (
+        <form onSubmit={(e) => {
+            e.preventDefault();
+            updateGoal();
+        }} className="flex flex-col space-y-4">
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Goal Title</label>
+                <input
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    type="text"
+                    value={editGoal.aim}
+                    onChange={(e) => handleEditGoalChange('aim', e.target.value)}
+                    placeholder="Enter goal title"
+                    required
+                    autoFocus
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={editGoal.description}
+                    onChange={(e) => handleEditGoalChange('description', e.target.value)}
+                    placeholder="Enter goal description"
+                    rows="3"
+                    required
+                />
+            </div>
+            <div className="flex gap-2 pt-2">
+                <button
+                    type="button"
+                    onClick={() => setEditGoal({ id: null, aim: '', description: '' })}
+                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition-colors"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
+                >
+                    Update Goal
+                </button>
+            </div>
+        </form>
+    ), [editGoal, handleEditGoalChange]);
+
+    const GoalItem = useCallback(({ goal }) => {
+        const progress = calculateProgress(goal);
         return (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                <div className="bg-white rounded-lg shadow-lg p-6 w-96 max-w-full mx-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-bold text-gray-800">{title}</h2>
-                        <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
-                            <IoClose size={24} />
-                        </button>
+            <div key={goal._id} className="flex flex-col bg-white rounded-lg shadow-md p-4 w-full">
+                <div className="flex items-center justify-between">
+                    <div className="flex flex-col flex-1">
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => toggleExpandGoal(goal._id)}
+                                className="text-gray-500 hover:text-gray-700"
+                                type="button"
+                            >
+                                {expandedGoals[goal._id] ? <MdExpandLess size={20} /> : <MdExpandMore size={20} />}
+                            </button>
+                            <button
+                                onClick={() => toggleGoal(goal._id)}
+                                className={`h-6 w-6 border rounded-full flex items-center justify-center transition-colors ${goal.Goal_Completed
+                                    ? "bg-green-500 border-green-500"
+                                    : "border-gray-300 hover:border-green-500"
+                                    }`}
+                                type="button"
+                            >
+                                {goal.Goal_Completed && <MdOutlineDone className="text-white" size={14} />}
+                            </button>
+                            <span className={`text-lg font-semibold ${goal.Goal_Completed ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+                                {goal.Goal_Aim}
+                            </span>
+                        </div>
+                        <span className="text-sm text-gray-600 mt-1 ml-7">{goal.Description}</span>
+
+                        {goal.subGoals?.length > 0 && (
+                            <div className="mt-2 ml-7">
+                                <div className="flex justify-between text-xs text-gray-500 mb-1">
+                                    <span>Progress</span>
+                                    <span>{Math.round(progress)}%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div
+                                        className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                                        style={{ width: `${progress}%` }}
+                                    ></div>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    {children}
+                    <div className="flex gap-x-2 ml-4">
+                        <button
+                            className="p-2 text-blue-500 hover:text-blue-700 rounded-lg transition-colors"
+                            onClick={() => setEditGoal({ id: goal._id, aim: goal.Goal_Aim, description: goal.Description })}
+                            type="button"
+                        >
+                            <FaEdit size={18} />
+                        </button>
+                        <button
+                            onClick={() => deleteGoal(goal._id)}
+                            className="p-2 text-red-500 hover:text-red-700 rounded-lg transition-colors"
+                            type="button"
+                        >
+                            <FaTrashAlt size={16} />
+                        </button>
+
+                    </div>
                 </div>
+
+                {expandedGoals[goal._id] && (
+                    <div className="p-2 mt-4 ml-7  pt-4">
+                        <div className="flex justify-between items-center mb-3">
+                            <h4 className="font-medium text-gray-700">Subgoals</h4>
+                            <button
+                                onClick={() => setNewSubGoal({ goalId: goal._id, title: '' })}
+                                className="px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 hover:shadow-sm flex items-center gap-1"
+                                style={{
+                                    backgroundColor: 'var(--primary-color)',
+                                    color: 'white'
+                                }}
+                                type="button"
+                            >
+                                Add Subgoal
+                            </button>
+                        </div>
+
+                        {newSubGoal.goalId === goal._id && (
+                            <div className="flex gap-2 mb-3">
+                                <input
+                                    type="text"
+                                    value={newSubGoal.title}
+                                    onChange={(e) => handleNewSubGoalChange(e.target.value)}
+                                    placeholder="Enter subgoal title"
+                                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-green-500"
+                                    autoFocus
+                                />
+                                <button
+                                    onClick={() => addSubGoal(goal._id)}
+                                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm transition-colors"
+                                    type="button"
+                                >
+                                    Add
+                                </button>
+                                <button
+                                    onClick={() => setNewSubGoal({ goalId: null, title: '' })}
+                                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-3 py-2 rounded-md text-sm transition-colors"
+                                    type="button"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="space-y-2">
+                            {goal.subGoals?.length > 0 ? (
+                                goal.subGoals.map((subGoal) => (
+                                    <div key={subGoal._id} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+                                        <div className="flex items-center gap-3 flex-1">
+                                            <button
+                                                onClick={() => toggleSubGoal(goal._id, subGoal._id, subGoal.completed)}
+                                                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${subGoal.completed
+                                                    ? 'bg-green-500 border-green-500 text-white'
+                                                    : 'border-gray-300 hover:border-green-500'
+                                                    }`}
+                                                type="button"
+                                            >
+                                                {subGoal.completed && <MdOutlineDone size={14} />}
+                                            </button>
+                                            <span className={`flex-1 ${subGoal.completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>
+                                                {subGoal.title}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => deleteSubGoal(goal._id, subGoal._id)}
+                                            className="text-red-400 hover:text-red-600 transition-colors ml-2"
+                                            type="button"
+                                        >
+                                            <FaTrashAlt size={14} />
+                                        </button>
+
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-center text-gray-400 py-4">No subgoals yet. Add your first subgoal!</div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
         );
-    };
+    }, [expandedGoals, handleNewSubGoalChange]);
 
     return (
-        <div className="flex flex-col min-h-screen p-4">
+        <div className="flex flex-col min-h-screen p-12 bg-[#e6b89c]">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">Your Active Goals</h1>
-                <button 
-                    onClick={() => setIsModalOpen(true)} 
-                    className="flex items-center justify-center w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 hover:shadow-sm flex items-center justify-center gap-1"
+                    style={{
+                        backgroundColor: 'var(--primary-color)',
+                        color: 'white'
+                    }}
                     disabled={loading}
                     title="Add New Goal"
+                    type="button"
                 >
                     {loading ? (
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></div>
                     ) : (
-                        <MdAdd size={24} />
+                        <MdAdd size={16} />
                     )}
+                    Add Goal
                 </button>
             </div>
 
@@ -188,224 +465,26 @@ const PersonalGoalsPage = () => {
                         <p className="text-sm">Click the <span className="font-semibold">+</span> button above to add your first goal!</p>
                     </div>
                 ) : (
-                    goals.map(goal => {
-                        const progress = calculateProgress(goal);
-                        return (
-                            <div key={goal._id} className="flex flex-col bg-white rounded-lg shadow-md p-4 w-full">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex flex-col flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                onClick={() => toggleExpandGoal(goal._id)}
-                                                className="text-gray-500 hover:text-gray-700"
-                                            >
-                                                {expandedGoals[goal._id] ? <MdExpandLess size={20} /> : <MdExpandMore size={20} />}
-                                            </button>
-                                            <span className={`text-lg font-semibold ${goal.Goal_Completed ? 'line-through text-gray-400' : 'text-gray-800'}`}>
-                                                {goal.Goal_Aim}
-                                            </span>
-                                        </div>
-                                        <span className="text-sm text-gray-600 mt-1 ml-7">{goal.Description}</span>
-                                        
-                                        {goal.subGoals?.length > 0 && (
-                                            <div className="mt-2 ml-7">
-                                                <div className="flex justify-between text-xs text-gray-500 mb-1">
-                                                    <span>Progress</span>
-                                                    <span>{Math.round(progress)}%</span>
-                                                </div>
-                                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                                    <div 
-                                                        className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                                                        style={{ width: `${progress}%` }}
-                                                    ></div>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="flex gap-x-2 ml-4">
-                                        <button
-                                            className="p-2 text-blue-500 hover:text-blue-700 rounded-lg transition-colors"
-                                            onClick={() => setEditGoal({ id: goal._id, aim: goal.Goal_Aim, description: goal.Description })}
-                                        >
-                                            <MdModeEditOutline />
-                                        </button>
-                                        <button
-                                            onClick={() => deleteGoal(goal._id)}
-                                            className="p-2 text-red-500 hover:text-red-700 rounded-lg transition-colors"
-                                        >
-                                            <FaTrash />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {expandedGoals[goal._id] && (
-                                    <div className="mt-4 ml-7 border-t pt-4">
-                                        <div className="flex justify-between items-center mb-3">
-                                            <h4 className="font-medium text-gray-700">Subgoals</h4>
-                                            <button
-                                                onClick={() => setNewSubGoal({ goalId: goal._id, title: '' })}
-                                                className="flex items-center gap-1 text-sm bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md transition-colors"
-                                            >
-                                                <MdAdd size={16} />
-                                                Add Subgoal
-                                            </button>
-                                        </div>
-
-                                        {newSubGoal.goalId === goal._id && (
-                                            <div className="flex gap-2 mb-3">
-                                                <input
-                                                    type="text"
-                                                    value={newSubGoal.title}
-                                                    onChange={(e) => setNewSubGoal({ ...newSubGoal, title: e.target.value })}
-                                                    placeholder="Enter subgoal title"
-                                                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-green-500"
-                                                    autoFocus
-                                                />
-                                                <button
-                                                    onClick={() => addSubGoal(goal._id)}
-                                                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm transition-colors"
-                                                >
-                                                    Add
-                                                </button>
-                                                <button
-                                                    onClick={() => setNewSubGoal({ goalId: null, title: '' })}
-                                                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-3 py-2 rounded-md text-sm transition-colors"
-                                                >
-                                                    Cancel
-                                                </button>
-                                            </div>
-                                        )}
-
-                                        <div className="space-y-2">
-                                            {goal.subGoals?.length > 0 ? (
-                                                goal.subGoals.map((subGoal) => (
-                                                    <div key={subGoal._id} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
-                                                        <div className="flex items-center gap-3 flex-1">
-                                                            <button
-                                                                onClick={() => toggleSubGoal(goal._id, subGoal._id, subGoal.completed)}
-                                                                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                                                                    subGoal.completed 
-                                                                        ? 'bg-green-500 border-green-500 text-white' 
-                                                                        : 'border-gray-300 hover:border-green-500'
-                                                                }`}
-                                                            >
-                                                                {subGoal.completed && <MdOutlineDone size={14} />}
-                                                            </button>
-                                                            <span className={`flex-1 ${subGoal.completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>
-                                                                {subGoal.title}
-                                                            </span>
-                                                        </div>
-                                                        <button
-                                                            onClick={() => deleteSubGoal(goal._id, subGoal._id)}
-                                                            className="text-red-400 hover:text-red-600 transition-colors ml-2"
-                                                        >
-                                                            <FaTrash size={14} />
-                                                        </button>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <div className="text-center text-gray-400 py-4">No subgoals yet. Add your first subgoal!</div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })
+                    goals.map(goal => <GoalItem key={goal._id} goal={goal} />)
                 )}
             </div>
 
             {/* Add Goal Modal */}
-            <Modal title="Add New Goal" isOpen={isModalOpen} onClose={() => !loading && setIsModalOpen(false)}>
-                <form onSubmit={addGoal} className="flex flex-col space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Goal Title</label>
-                        <input
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            type="text"
-                            value={newGoal.aim}
-                            onChange={(e) => setNewGoal({ ...newGoal, aim: e.target.value })}
-                            placeholder="Enter goal title"
-                            required
-                            disabled={loading}
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                        <textarea
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            value={newGoal.description}
-                            onChange={(e) => setNewGoal({ ...newGoal, description: e.target.value })}
-                            placeholder="Enter goal description"
-                            rows="3"
-                            required
-                            disabled={loading}
-                        />
-                    </div>
-                    <div className="flex gap-2 pt-2">
-                        <button
-                            type="button"
-                            onClick={() => setIsModalOpen(false)}
-                            className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition-colors"
-                            disabled={loading}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors disabled:opacity-50"
-                            disabled={loading}
-                        >
-                            {loading ? 'Adding...' : 'Add Goal'}
-                        </button>
-                    </div>
-                </form>
+            <Modal
+                title="Add New Goal"
+                isOpen={isModalOpen}
+                onClose={() => !loading && setIsModalOpen(false)}
+            >
+                <AddGoalForm />
             </Modal>
 
             {/* Edit Goal Modal */}
-            <Modal title="Edit Goal" isOpen={!!editGoal.id} onClose={() => setEditGoal({ id: null, aim: '', description: '' })}>
-                <form onSubmit={(e) => {
-                    e.preventDefault();
-                    updateGoal();
-                }} className="flex flex-col space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Goal Title</label>
-                        <input
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            type="text"
-                            value={editGoal.aim}
-                            onChange={(e) => setEditGoal({ ...editGoal, aim: e.target.value })}
-                            placeholder="Enter goal title"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                        <textarea
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            value={editGoal.description}
-                            onChange={(e) => setEditGoal({ ...editGoal, description: e.target.value })}
-                            placeholder="Enter goal description"
-                            rows="3"
-                            required
-                        />
-                    </div>
-                    <div className="flex gap-2 pt-2">
-                        <button
-                            type="button"
-                            onClick={() => setEditGoal({ id: null, aim: '', description: '' })}
-                            className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
-                        >
-                            Update Goal
-                        </button>
-                    </div>
-                </form>
+            <Modal
+                title="Edit Goal"
+                isOpen={!!editGoal.id}
+                onClose={() => setEditGoal({ id: null, aim: '', description: '' })}
+            >
+                <EditGoalForm />
             </Modal>
         </div>
     );

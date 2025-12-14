@@ -81,7 +81,7 @@ export default function HeroPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-[#1e1e2f] to-[#2e2e4f] text-white font-sans p-10 gap-10 md:flex-row md:p-5">
+    <div className="flex h-screen bg-gradient-to-br from-[#7c93b5] to-[#a6c1ee] text-white font-sans p-10 gap-10 md:flex-row md:p-5">
       {/* Left side - Character & Stats */}
       <div className="flex-1 flex flex-col items-center justify-center gap-8">
         <div className="border-4 border-white rounded-2xl p-4 bg-black bg-opacity-30 backdrop-blur-md">
@@ -192,7 +192,7 @@ export default function HeroPage() {
                     {/* Subtask Progress */}
                     <div className="mt-2">
                       <div className="flex justify-between text-xs text-gray-800 mb-1">
-                        <span>{task.SubTasks ? `${completedSubtasks}/${totalSubtasks} subtasks` : 'No subtasks'}</span>
+                        <span>{task.SubTasks ? `${completedSubtasks}/${totalSubtasks} Subtasks` : 'No subtasks'}</span>
                         <span>{Math.round(progress)}%</span>
                       </div>
                       <div className="w-full bg-gray-700 rounded-full h-2">
