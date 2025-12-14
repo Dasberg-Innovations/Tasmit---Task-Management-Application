@@ -8,6 +8,8 @@ export const loginUser = async (username, password) => {
     const response = await axios.post(`${Url}/login`, {
       username,
       password
+    }, {
+      withCredentials: true 
     });
     return response.data;
   } catch (error) {
