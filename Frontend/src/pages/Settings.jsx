@@ -15,7 +15,7 @@ function Settings() {
       text: "#1e293b"
     },
     dustyLavender: {
-      name: "Lavender", 
+      name: "Lavender",
       primary: "#a78bfa",
       background: "#fafafa",
       text: "#4c1d95"
@@ -45,7 +45,7 @@ function Settings() {
       text: "#7c2d12"
     },
     pink: {
-      name: "Pink", 
+      name: "Pink",
       primary: "#ec4899",
       background: "#fdf2f8",
       text: "#831843"
@@ -60,9 +60,9 @@ function Settings() {
 
   const fetchUserSettings = async () => {
     if (!user) return;
-    
+
     try {
-      const response = await fetch(`http://localhost:5555/settings/${user.id}`);
+      const response = await fetch(`https://tasmit-task-management-application.onrender.com/settings/${user.id}`);
       if (response.ok) {
         const settings = await response.json();
         if (settings.theme) {
@@ -80,10 +80,10 @@ function Settings() {
   };
   const saveSettingsToDatabase = async (themeName) => {
     if (!user) return;
-    
+
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5555/settings', {
+      const response = await fetch('https://tasmit-task-management-application.onrender.com/settings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -116,7 +116,7 @@ function Settings() {
 
   const applyTheme = (themeName) => {
     const theme = themes[themeName];
-    
+
     const root = document.documentElement;
     root.style.setProperty('--primary-color', theme.primary);
     root.style.setProperty('--background-color', theme.background);
@@ -135,37 +135,35 @@ function Settings() {
     <div className="p-6 bg-[#d4a5a5] dark:text-white min-h-screen flex items-center justify-center">
       <div className="w-full max-w-2xl">
         <h2 className="text-xl font-semibold mb-6 text-center">Settings</h2>
-        
+
         {message && (
-          <div className={`mb-4 p-3 rounded text-center ${
-            message.includes('Error') 
-              ? 'bg-red-100 text-red-700 border border-red-300' 
+          <div className={`mb-4 p-3 rounded text-center ${message.includes('Error')
+              ? 'bg-red-100 text-red-700 border border-red-300'
               : 'bg-green-100 text-green-700 border border-green-300'
-          }`}>
+            }`}>
             {message}
           </div>
         )}
-        
+
         <div className="space-y-6">
           <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-4">
             <h3 className="font-medium mb-3">Theme</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               Choose your color theme {loading && "(Saving...)"}
             </p>
-            
+
             <div className="grid grid-cols-4 gap-3">
               {Object.entries(themes).map(([key, theme]) => (
                 <button
                   key={key}
                   disabled={loading}
-                  className={`flex flex-col items-center p-3 rounded border-2 transition-colors ${
-                    currentTheme === key 
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                  className={`flex flex-col items-center p-3 rounded border-2 transition-colors ${currentTheme === key
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                       : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'
-                  } ${loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                    } ${loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   onClick={() => handleThemeChange(key)}
                 >
-                  <div 
+                  <div
                     className="w-8 h-8 rounded-full mb-2 border border-gray-300 dark:border-gray-600"
                     style={{ backgroundColor: theme.primary }}
                   ></div>

@@ -17,12 +17,12 @@ const Calendar = () => {
 
   const loadTasks = async () => {
     try {
-      const response = await axios.get(`http://localhost:5555/tasks/user/${user.id}`);
+      const response = await axios.get(`https://tasmit-task-management-application.onrender.com/tasks/user/${user.id}`);
       const tasksWithDates = response.data.map(task => ({
         ...task,
-        due_date: task.Due_Date ? 
-          new Date(new Date(task.Due_Date).setHours(0,0,0,0)) : 
-          new Date(new Date(task.createdAt).setHours(0,0,0,0))
+        due_date: task.Due_Date ?
+          new Date(new Date(task.Due_Date).setHours(0, 0, 0, 0)) :
+          new Date(new Date(task.createdAt).setHours(0, 0, 0, 0))
       }));
       setTasks(tasksWithDates);
     } catch (error) {
@@ -35,10 +35,10 @@ const Calendar = () => {
   };
 
   const getTasksForDay = (date) => {
-    const dayStart = new Date(date.setHours(0,0,0,0));
+    const dayStart = new Date(date.setHours(0, 0, 0, 0));
     return tasks.filter(task => {
       if (!task.due_date) return false;
-      return new Date(task.due_date.setHours(0,0,0,0)).getTime() === dayStart.getTime();
+      return new Date(task.due_date.setHours(0, 0, 0, 0)).getTime() === dayStart.getTime();
     });
   };
 
@@ -63,9 +63,9 @@ const Calendar = () => {
     // Current month days
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
-      calendar.push({ 
-        date, 
-        isCurrentMonth: true, 
+      calendar.push({
+        date,
+        isCurrentMonth: true,
         tasks: getTasksForDay(new Date(date))
       });
     }
@@ -135,11 +135,11 @@ const Calendar = () => {
         {selectedDay && (
           <div className="mt-6 border bg-white border-gray-200 rounded p-4">
             <h3 className="text-lg font-normal text-gray-900 mb-3">
-              {selectedDay.toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+              {selectedDay.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
               })}
             </h3>
             <div className="space-y-2 bg-blue-400">

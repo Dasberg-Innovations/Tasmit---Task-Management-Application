@@ -11,7 +11,7 @@ export default function GoalProgress({ userId }) {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await axios.get(`/api/tasks/user/${userId}`);
+        const response = await axios.get(`https://tasmit-task-management-application.onrender.com/api/tasks/user/${userId}`);
         const fetchedTasks = response.data;
         setTasks(fetchedTasks);
         updateGoalsProgress(fetchedTasks);

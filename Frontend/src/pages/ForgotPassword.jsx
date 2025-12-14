@@ -16,7 +16,7 @@ function ForgotPassword() {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5555/forgot-password', { email });
+      const response = await axios.post('https://tasmit-task-management-application.onrender.com/forgot-password', { email });
       setMessage(response.data.message);
     } catch (error) {
       setError(error.response?.data?.message || 'An error occurred. Please try again.');

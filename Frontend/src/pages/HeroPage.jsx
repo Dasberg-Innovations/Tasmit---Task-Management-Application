@@ -17,8 +17,8 @@ export default function HeroPage() {
     try {
       setLoading(true);
       const [goalsRes, tasksRes] = await Promise.all([
-        axios.get(`http://localhost:5555/goals/user/${user.id}`),
-        axios.get(`http://localhost:5555/tasks/user/${user.id}`)
+        axios.get(`https://tasmit-task-management-application.onrender.com/goals/user/${user.id}`),
+        axios.get(`https://tasmit-task-management-application.onrender.com/tasks/user/${user.id}`)
       ]);
       setGoals(goalsRes.data);
       setTasks(tasksRes.data);
@@ -161,7 +161,7 @@ export default function HeroPage() {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-3">
                         <div className={`w-3 h-3 rounded-full ${task.Task_Completed ? 'bg-emerald-500' :
-                            isOverdue ? 'bg-rose-500' : 'bg-amber-500'
+                          isOverdue ? 'bg-rose-500' : 'bg-amber-500'
                           }`}></div>
                         <div>
                           <div className={`font-medium ${task.Task_Completed ? 'line-through text-slate-400' : 'text-slate-800'}`}>
@@ -175,7 +175,7 @@ export default function HeroPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <div className={`text-xs px-2 py-1 rounded-full ${task.Priority === 'High' ? 'bg-rose-100 text-rose-800' :
-                            task.Priority === 'Medium' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+                          task.Priority === 'Medium' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
                           }`}>
                           {task.Priority}
                         </div>
@@ -191,7 +191,7 @@ export default function HeroPage() {
                       <div className="w-full bg-slate-200 rounded-full h-2">
                         <div
                           className={`h-2 rounded-full transition-all duration-500 ${progress === 100 ? 'bg-emerald-500' :
-                              progress >= 50 ? 'bg-amber-500' : 'bg-rose-500'
+                            progress >= 50 ? 'bg-amber-500' : 'bg-rose-500'
                             }`}
                           style={{ width: `${progress}%` }}
                         ></div>

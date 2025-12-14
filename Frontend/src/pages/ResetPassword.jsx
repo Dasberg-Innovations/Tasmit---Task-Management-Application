@@ -25,7 +25,7 @@ function ResetPassword() {
     setLoading(true);
 
     try {
-      const response = await axios.post(`http://localhost:5555/reset-password/${id}/${token}`, { password });
+      const response = await axios.post(`https://tasmit-task-management-application.onrender.com/reset-password/${id}/${token}`, { password });
       
       if (response.data.Status === "Success") {
         setSuccess('Password reset successfully! Redirecting to login...');

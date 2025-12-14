@@ -138,7 +138,7 @@ const PersonalGoalsPage = () => {
 
     const fetchGoals = async () => {
         try {
-            const response = await axios.get(`http://localhost:5555/goals/user/${user.id}`);
+            const response = await axios.get(`https://tasmit-task-management-application.onrender.com/goals/user/${user.id}`);
             setGoals(response.data);
         } catch (error) {
             console.error('Error fetching goals:', error);
@@ -154,12 +154,13 @@ const PersonalGoalsPage = () => {
 
         setLoading(true);
         try {
-            const response = await axios.post('http://localhost:5555/goals', {
+            const response = await axios.post('https://tasmit-task-management-application.onrender.com/goals', {
                 userId: user.id,
                 Goal_Aim: newGoal.aim,
                 Description: newGoal.description,
                 Goal_Completed: false
             });
+
 
             setGoals(prev => [...prev, response.data]);
             setNewGoal({ aim: '', description: '' });
@@ -175,9 +176,10 @@ const PersonalGoalsPage = () => {
     const toggleGoal = async (id) => {
         try {
             const goal = goals.find(g => g._id === id);
-            const response = await axios.put(`http://localhost:5555/goals/${id}`, {
+            const response = await axios.put(`https://tasmit-task-management-application.onrender.com/goals/${id}`, {
                 Goal_Completed: !goal.Goal_Completed
             });
+
 
             setGoals(goals.map(g => g._id === id ? response.data : g));
         } catch (error) {
@@ -192,7 +194,7 @@ const PersonalGoalsPage = () => {
         }
 
         try {
-            const response = await axios.put(`http://localhost:5555/goals/${editGoal.id}`, {
+            const response = await axios.put(`https://tasmit-task-management-application.onrender.com/goals/${editGoal.id}`, {
                 Goal_Aim: editGoal.aim,
                 Description: editGoal.description
             });
@@ -209,7 +211,7 @@ const PersonalGoalsPage = () => {
         if (!window.confirm('Are you sure you want to delete this goal?')) return;
 
         try {
-            await axios.delete(`http://localhost:5555/goals/${id}`);
+            await axios.delete(`https://tasmit-task-management-application.onrender.com/goals/${id}`);
             setGoals(goals.filter(g => g._id !== id));
         } catch (error) {
             console.error('Error deleting goal:', error);
@@ -224,7 +226,7 @@ const PersonalGoalsPage = () => {
         }
 
         try {
-            const response = await axios.post(`http://localhost:5555/goals/${goalId}/subgoals`, {
+            const response = await axios.post(`https://tasmit-task-management-application.onrender.com/goals/${goalId}/subgoals`, {
                 title: newSubGoal.title
             });
 
@@ -238,7 +240,7 @@ const PersonalGoalsPage = () => {
 
     const toggleSubGoal = async (goalId, subGoalId, completed) => {
         try {
-            const response = await axios.put(`http://localhost:5555/goals/${goalId}/subgoals/${subGoalId}`, {
+            const response = await axios.put(`https://tasmit-task-management-application.onrender.com/goals/${goalId}/subgoals/${subGoalId}`, {
                 completed: !completed
             });
 
