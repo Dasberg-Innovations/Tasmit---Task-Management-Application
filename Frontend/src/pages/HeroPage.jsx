@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../components/AuthContext";
 import axios from "axios";
 
+
 export default function HeroPage() {
   const { user } = useAuth();
   const [goals, setGoals] = useState([]);
@@ -80,7 +81,7 @@ export default function HeroPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-slate-100 to-slate-200 text-slate-800 font-sans p-10 gap-10 md:p-5">
+    <div className="flex flex-col  bg-gradient-to-br from-slate-100 to-slate-200 text-slate-800 font-sans p-10 gap-10 md:p-5">
       <div className="mt-7 w-full max-w-6xl mx-auto">
         <div className="bg-[#92B9BD] backdrop-blur-md rounded-3xl p-6 border-slate-200">
           <div className="bg grid grid-cols-2 md:grid-cols-4 gap-5">

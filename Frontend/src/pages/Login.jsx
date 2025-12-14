@@ -35,41 +35,79 @@ function Login() {
         className="flex-1 bg-cover bg-center"
         style={{ backgroundImage: `url(${DesktopImage})` }}
       />
-      <div className="flex items-center justify-center flex-col w-full max-w-md p-8 bg-white shadow-md">
-        <h2 className="mb-4 text-2xl font-bold text-center">Login</h2>
-        {error && <p className="mb-4 text-red-500 text-center">{error}</p>}
-        <form className="flex flex-col" onSubmit={handleLogin}>
-          <input
-            type="text"
-            placeholder="Username or Email"
-            value={username}
-            onChange={(e) => setUsername(e.target.value.trim())}
-            className="p-2 mb-4 border border-gray-300 rounded"
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="p-2 mb-4 border border-gray-300 rounded"
-            required
-          />
+      <div className="flex items-center justify-center flex-col w-full max-w-md p-8 bg-[#34312D] shadow-md">
+        <h2 className="mb-8 text-2xl font-bold text-center text-white">Login</h2>
+        {error && <p className="mb-6 text-red-500 text-center">{error}</p>}
+        
+        <form className="w-full space-y-8" onSubmit={handleLogin}>
+          <div className="relative w-full">
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value.trim())}
+              className="floating-input peer w-full px-4 pt-6 pb-2 h-14 text-base font-normal 
+                bg-[#4a4a4a]/10 border-0 border-b-2 border-white text-white 
+                transition-all duration-200 ease-in-out 
+                focus:bg-[#4a4a4a]/20 focus:outline-none focus:border-[#0077FF]
+                hover:bg-[#4a4a4a]/20 hover:border-gray-300
+                rounded-t"
+              required
+            />
+            <label 
+              className="floating-label absolute left-4 top-5 text-base text-gray-400 
+                pointer-events-none transition-all duration-200 ease-in-out
+                peer-focus:top-2 peer-focus:text-xs peer-focus:text-[#0077FF]
+                peer-[:not(:placeholder-shown)]:top-2 
+                peer-[:not(:placeholder-shown)]:text-xs 
+                peer-[:not(:placeholder-shown)]:text-[#0077FF]"
+            >
+              Username or Email
+            </label>
+          </div>
+          <div className="relative w-full">
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="floating-input peer w-full px-4 pt-6 pb-2 h-14 text-base font-normal 
+                bg-[#4a4a4a]/10 border-0 border-b-2 border-white text-white 
+                transition-all duration-200 ease-in-out 
+                focus:bg-[#4a4a4a]/20 focus:outline-none focus:border-[#0077FF]
+                hover:bg-[#4a4a4a]/20 hover:border-gray-300
+                rounded-t"
+              required
+            />
+            <label 
+              className="floating-label absolute left-4 top-5 text-base text-gray-400 
+                pointer-events-none transition-all duration-200 ease-in-out
+                peer-focus:top-2 peer-focus:text-xs peer-focus:text-[#0077FF]
+                peer-[:not(:placeholder-shown)]:top-2 
+                peer-[:not(:placeholder-shown)]:text-xs 
+                peer-[:not(:placeholder-shown)]:text-[#0077FF]"
+            >
+              Password
+            </label>
+          </div>
+
           <button
             type="submit"
-            className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="w-full p-3 bg-[#0077FF] text-white rounded font-medium 
+              hover:bg-[#005ECC] transition-colors duration-200"
           >
             Login
           </button>
         </form>
-        <p className="mt-4 text-center">
-          Don't have an account?{" "}
-          <Link to="/register" className="text-blue-500 hover:underline">Register</Link>
-        </p>
-          <p className="mt-4 text-center">
-          Forgot Password?{" "}
-          <Link to="/forgot-password" className="text-blue-500 hover:underline">Forgot Password</Link>
-        </p>
+
+        <div className="w-full mt-8 space-y-4 text-center">
+          <p className="text-white">
+            Don't have an account?{" "}
+            <Link to="/register" className="text-white hover:underline font-medium">Register</Link>
+          </p>
+          <p className="text-white">
+            Forgot Password?{" "}
+            <Link to="/forgot-password" className="text-white hover:underline font-medium">Forgot Password</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -444,7 +444,7 @@ const PersonalGoalsPage = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen p-12 bg-[#e6b89c]">
+        <div className="flex flex-col min-h-screen p-12 bg-[#7E7F83]">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">Your Active Goals</h1>
                 <button
