@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { MdOutlineDone, MdAdd, MdExpandMore, MdExpandLess } from 'react-icons/md';
 import { FaTrashAlt, FaEdit } from 'react-icons/fa';
-
 import { IoClose } from 'react-icons/io5';
 import { useAuth } from '../components/AuthContext';
 
@@ -27,6 +26,101 @@ const Modal = ({ title, isOpen, onClose, children }) => {
         </div>
     );
 };
+
+// Move AddGoalForm outside of PersonalGoalsPage
+const AddGoalForm = ({ newGoal, loading, onNewGoalChange, onAddGoal, onCancel }) => (
+    <form onSubmit={onAddGoal} className="flex flex-col space-y-4">
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Goal Title</label>
+            <input
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                type="text"
+                name="aim"
+                value={newGoal.aim}
+                onChange={onNewGoalChange}
+                placeholder="Enter goal title"
+                required
+                disabled={loading}
+            />
+        </div>
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                name="description"
+                value={newGoal.description}
+                onChange={onNewGoalChange}
+                placeholder="Enter goal description"
+                rows="3"
+                required
+                disabled={loading}
+            />
+        </div>
+        <div className="flex gap-2 pt-2">
+            <button
+                type="button"
+                onClick={onCancel}
+                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition-colors"
+                disabled={loading}
+            >
+                Cancel
+            </button>
+            <button
+                type="submit"
+                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors disabled:opacity-50"
+                disabled={loading}
+            >
+                {loading ? 'Adding...' : 'Add Goal'}
+            </button>
+        </div>
+    </form>
+);
+
+// Move EditGoalForm outside of PersonalGoalsPage as well for consistency
+const EditGoalForm = ({ editGoal, onEditGoalChange, onUpdateGoal, onCancel }) => (
+    <form onSubmit={(e) => {
+        e.preventDefault();
+        onUpdateGoal();
+    }} className="flex flex-col space-y-4">
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Goal Title</label>
+            <input
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                type="text"
+                value={editGoal.aim}
+                onChange={(e) => onEditGoalChange('aim', e.target.value)}
+                placeholder="Enter goal title"
+                required
+            />
+        </div>
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={editGoal.description}
+                onChange={(e) => onEditGoalChange('description', e.target.value)}
+                placeholder="Enter goal description"
+                rows="3"
+                required
+            />
+        </div>
+        <div className="flex gap-2 pt-2">
+            <button
+                type="button"
+                onClick={onCancel}
+                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition-colors"
+            >
+                Cancel
+            </button>
+            <button
+                type="submit"
+                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
+            >
+                Update Goal
+            </button>
+        </div>
+    </form>
+);
 
 const PersonalGoalsPage = () => {
     const { user } = useAuth();
@@ -68,7 +162,8 @@ const PersonalGoalsPage = () => {
             });
 
             setGoals(prev => [...prev, response.data]);
-            resetForm();
+            setNewGoal({ aim: '', description: '' });
+            setIsModalOpen(false);
         } catch (error) {
             console.error('Error creating goal:', error);
             alert(`Failed to add goal: ${error.response?.data?.message || error.message}`);
@@ -171,123 +266,32 @@ const PersonalGoalsPage = () => {
         return (completed / goal.subGoals.length) * 100;
     };
 
-    const resetForm = () => {
-        setNewGoal({ aim: '', description: '' });
-        setIsModalOpen(false);
-    };
-
     const toggleExpandGoal = (goalId) => {
         setExpandedGoals(prev => ({ ...prev, [goalId]: !prev[goalId] }));
     };
 
-    // Memoized event handlers
-    const handleNewGoalChange = useCallback((field, value) => {
-        setNewGoal(prev => ({ ...prev, [field]: value }));
+    const handleNewGoalChange = useCallback((e) => {
+        const { name, value } = e.target;
+        setNewGoal((prev) => ({ ...prev, [name]: value }));
     }, []);
 
     const handleEditGoalChange = useCallback((field, value) => {
-        setEditGoal(prev => ({ ...prev, [field]: value }));
+        setEditGoal((prev) => ({ ...prev, [field]: value }));
     }, []);
 
-    const handleNewSubGoalChange = useCallback((value) => {
-        setNewSubGoal(prev => ({ ...prev, title: value }));
-    }, []);
-
-    const AddGoalForm = useCallback(() => (
-        <form onSubmit={addGoal} className="flex flex-col space-y-4">
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Goal Title</label>
-                <input
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    type="text"
-                    value={newGoal.aim}
-                    onChange={(e) => handleNewGoalChange('aim', e.target.value)}
-                    placeholder="Enter goal title"
-                    required
-                    disabled={loading}
-                    autoFocus
-                />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={newGoal.description}
-                    onChange={(e) => handleNewGoalChange('description', e.target.value)}
-                    placeholder="Enter goal description"
-                    rows="3"
-                    required
-                    disabled={loading}
-                />
-            </div>
-            <div className="flex gap-2 pt-2">
-                <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition-colors"
-                    disabled={loading}
-                >
-                    Cancel
-                </button>
-                <button
-                    type="submit"
-                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors disabled:opacity-50"
-                    disabled={loading}
-                >
-                    {loading ? 'Adding...' : 'Add Goal'}
-                </button>
-            </div>
-        </form>
-    ), [newGoal, loading, handleNewGoalChange]);
-
-    const EditGoalForm = useCallback(() => (
-        <form onSubmit={(e) => {
-            e.preventDefault();
-            updateGoal();
-        }} className="flex flex-col space-y-4">
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Goal Title</label>
-                <input
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    type="text"
-                    value={editGoal.aim}
-                    onChange={(e) => handleEditGoalChange('aim', e.target.value)}
-                    placeholder="Enter goal title"
-                    required
-                    autoFocus
-                />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={editGoal.description}
-                    onChange={(e) => handleEditGoalChange('description', e.target.value)}
-                    placeholder="Enter goal description"
-                    rows="3"
-                    required
-                />
-            </div>
-            <div className="flex gap-2 pt-2">
-                <button
-                    type="button"
-                    onClick={() => setEditGoal({ id: null, aim: '', description: '' })}
-                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition-colors"
-                >
-                    Cancel
-                </button>
-                <button
-                    type="submit"
-                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
-                >
-                    Update Goal
-                </button>
-            </div>
-        </form>
-    ), [editGoal, handleEditGoalChange]);
-
-    const GoalItem = useCallback(({ goal }) => {
+    const GoalItem = ({ goal }) => {
         const progress = calculateProgress(goal);
+
+        const handleSubGoalChange = (value) => {
+            setNewSubGoal(prev => ({ ...prev, title: value }));
+        };
+
+        const handleAddSubGoal = (goalId) => {
+            if (newSubGoal.title.trim()) {
+                addSubGoal(goalId);
+            }
+        };
+
         return (
             <div key={goal._id} className="flex flex-col bg-white rounded-lg shadow-md p-4 w-full">
                 <div className="flex items-center justify-between">
@@ -346,16 +350,17 @@ const PersonalGoalsPage = () => {
                         >
                             <FaTrashAlt size={16} />
                         </button>
-
                     </div>
                 </div>
 
                 {expandedGoals[goal._id] && (
-                    <div className="p-2 mt-4 ml-7  pt-4">
+                    <div className="p-2 mt-4 ml-7 pt-4">
                         <div className="flex justify-between items-center mb-3">
                             <h4 className="font-medium text-gray-700">Subgoals</h4>
                             <button
-                                onClick={() => setNewSubGoal({ goalId: goal._id, title: '' })}
+                                onClick={() => setNewSubGoal(prev => prev.goalId === goal._id ?
+                                    { goalId: null, title: '' } :
+                                    { goalId: goal._id, title: '' })}
                                 className="px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 hover:shadow-sm flex items-center gap-1"
                                 style={{
                                     backgroundColor: 'var(--primary-color)',
@@ -363,7 +368,7 @@ const PersonalGoalsPage = () => {
                                 }}
                                 type="button"
                             >
-                                Add Subgoal
+                                {newSubGoal.goalId === goal._id ? 'Cancel' : 'Add Subgoal'}
                             </button>
                         </div>
 
@@ -372,13 +377,19 @@ const PersonalGoalsPage = () => {
                                 <input
                                     type="text"
                                     value={newSubGoal.title}
-                                    onChange={(e) => handleNewSubGoalChange(e.target.value)}
+                                    onChange={(e) => handleSubGoalChange(e.target.value)}
                                     placeholder="Enter subgoal title"
                                     className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-green-500"
                                     autoFocus
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleAddSubGoal(goal._id);
+                                        }
+                                    }}
                                 />
                                 <button
-                                    onClick={() => addSubGoal(goal._id)}
+                                    onClick={() => handleAddSubGoal(goal._id)}
                                     className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm transition-colors"
                                     type="button"
                                 >
@@ -420,7 +431,6 @@ const PersonalGoalsPage = () => {
                                         >
                                             <FaTrashAlt size={14} />
                                         </button>
-
                                     </div>
                                 ))
                             ) : (
@@ -431,7 +441,7 @@ const PersonalGoalsPage = () => {
                 )}
             </div>
         );
-    }, [expandedGoals, handleNewSubGoalChange]);
+    };
 
     return (
         <div className="flex flex-col min-h-screen p-12 bg-[#e6b89c]">
@@ -468,23 +478,31 @@ const PersonalGoalsPage = () => {
                     goals.map(goal => <GoalItem key={goal._id} goal={goal} />)
                 )}
             </div>
-
-            {/* Add Goal Modal */}
             <Modal
                 title="Add New Goal"
                 isOpen={isModalOpen}
                 onClose={() => !loading && setIsModalOpen(false)}
             >
-                <AddGoalForm />
+                <AddGoalForm
+                    newGoal={newGoal}
+                    loading={loading}
+                    onNewGoalChange={handleNewGoalChange}
+                    onAddGoal={addGoal}
+                    onCancel={() => setIsModalOpen(false)}
+                />
             </Modal>
 
-            {/* Edit Goal Modal */}
             <Modal
                 title="Edit Goal"
                 isOpen={!!editGoal.id}
                 onClose={() => setEditGoal({ id: null, aim: '', description: '' })}
             >
-                <EditGoalForm />
+                <EditGoalForm
+                    editGoal={editGoal}
+                    onEditGoalChange={handleEditGoalChange}
+                    onUpdateGoal={updateGoal}
+                    onCancel={() => setEditGoal({ id: null, aim: '', description: '' })}
+                />
             </Modal>
         </div>
     );

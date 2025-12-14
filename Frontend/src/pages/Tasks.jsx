@@ -27,6 +27,159 @@ const Modal = ({ title, isOpen, onClose, children }) => {
     );
 };
 
+// Move AddTaskForm outside the component
+const AddTaskForm = ({ newTask, loading, onNewTaskChange, onAddTask, onCancel }) => (
+    <form onSubmit={onAddTask} className="flex flex-col space-y-4">
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Task Title</label>
+            <input
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                type="text"
+                value={newTask.title}
+                onChange={(e) => onNewTaskChange('title', e.target.value)}
+                placeholder="Enter task title"
+                required
+                disabled={loading}
+                autoFocus
+            />
+        </div>
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={newTask.description}
+                onChange={(e) => onNewTaskChange('description', e.target.value)}
+                placeholder="Enter task description"
+                rows="3"
+                required
+                disabled={loading}
+            />
+        </div>
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+            <input
+                type="date"
+                value={newTask.due_date}
+                onChange={(e) => onNewTaskChange('due_date', e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+        </div>
+        <div className="flex space-x-2">
+            <select
+                value={newTask.priority}
+                onChange={(e) => onNewTaskChange('priority', e.target.value)}
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+                <option value="Low">Low Priority</option>
+                <option value="Medium">Medium Priority</option>
+                <option value="High">High Priority</option>
+            </select>
+            <select
+                value={newTask.urgency}
+                onChange={(e) => onNewTaskChange('urgency', e.target.value)}
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+                <option value="Low">Low Urgency</option>
+                <option value="Medium">Medium Urgency</option>
+                <option value="High">High Urgency</option>
+            </select>
+        </div>
+        <div className="flex gap-2 pt-2">
+            <button
+                type="button"
+                onClick={onCancel}
+                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition-colors"
+                disabled={loading}
+            >
+                Cancel
+            </button>
+            <button
+                type="submit"
+                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors disabled:opacity-50"
+                disabled={loading}
+            >
+                {loading ? 'Adding...' : 'Add Task'}
+            </button>
+        </div>
+    </form>
+);
+
+// Move EditTaskForm outside the component
+const EditTaskForm = ({ editTask, onEditTaskChange, onSaveEdit, onCancel }) => (
+    <form onSubmit={(e) => {
+        e.preventDefault();
+        onSaveEdit();
+    }} className="flex flex-col space-y-4">
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Task Title</label>
+            <input
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                type="text"
+                value={editTask.title}
+                onChange={(e) => onEditTaskChange('title', e.target.value)}
+                placeholder="Enter task title"
+                required
+                autoFocus
+            />
+        </div>
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={editTask.description}
+                onChange={(e) => onEditTaskChange('description', e.target.value)}
+                placeholder="Enter task description"
+                rows="3"
+                required
+            />
+        </div>
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+            <input
+                type="date"
+                value={editTask.due_date}
+                onChange={(e) => onEditTaskChange('due_date', e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+        </div>
+        <div className="flex space-x-2">
+            <select
+                value={editTask.priority}
+                onChange={(e) => onEditTaskChange('priority', e.target.value)}
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+                <option value="Low">Low Priority</option>
+                <option value="Medium">Medium Priority</option>
+                <option value="High">High Priority</option>
+            </select>
+            <select
+                value={editTask.urgency}
+                onChange={(e) => onEditTaskChange('urgency', e.target.value)}
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+                <option value="Low">Low Urgency</option>
+                <option value="Medium">Medium Urgency</option>
+                <option value="High">High Urgency</option>
+            </select>
+        </div>
+        <div className="flex gap-2 pt-2">
+            <button
+                type="button"
+                onClick={onCancel}
+                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition-colors"
+            >
+                Cancel
+            </button>
+            <button
+                type="submit"
+                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
+            >
+                Update Task
+            </button>
+        </div>
+    </form>
+);
+
 const TaskManager = () => {
     const { user } = useAuth();
     const [tasks, setTasks] = useState([]);
@@ -65,7 +218,11 @@ const TaskManager = () => {
 
     const addTask = async (e) => {
         e.preventDefault();
-        if (!newTask.title || !newTask.description || !user) return;
+
+        if (!newTask.title.trim() || !newTask.description.trim() || !user) {
+            alert('Please fill in all required fields');
+            return;
+        }
 
         setLoading(true);
         try {
@@ -74,7 +231,7 @@ const TaskManager = () => {
                 : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
             const response = await axios.post('http://localhost:5555/tasks', {
-                user: user.id,
+                userId: user.id, 
                 Task_Title: newTask.title,
                 Description: newTask.description,
                 Task_Completed: false,
@@ -232,164 +389,6 @@ const TaskManager = () => {
         setNewSubTask(prev => ({ ...prev, title: value }));
     }, []);
 
-    const AddTaskForm = useCallback(() => (
-        <form onSubmit={addTask} className="flex flex-col space-y-4">
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Task Title</label>
-                <input
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    type="text"
-                    value={newTask.title}
-                    onChange={(e) => handleNewTaskChange('title', e.target.value)}
-                    placeholder="Enter task title"
-                    required
-                    disabled={loading}
-                    autoFocus
-                />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={newTask.description}
-                    onChange={(e) => handleNewTaskChange('description', e.target.value)}
-                    placeholder="Enter task description"
-                    rows="3"
-                    required
-                    disabled={loading}
-                />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
-                <input
-                    type="date"
-                    value={newTask.due_date}
-                    onChange={(e) => handleNewTaskChange('due_date', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-            </div>
-            <div className="flex space-x-2">
-                <select
-                    value={newTask.priority}
-                    onChange={(e) => handleNewTaskChange('priority', e.target.value)}
-                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                    <option value="Low">Low Priority</option>
-                    <option value="Medium">Medium Priority</option>
-                    <option value="High">High Priority</option>
-                </select>
-                <select
-                    value={newTask.urgency}
-                    onChange={(e) => handleNewTaskChange('urgency', e.target.value)}
-                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                    <option value="Low">Low Urgency</option>
-                    <option value="Medium">Medium Urgency</option>
-                    <option value="High">High Urgency</option>
-                </select>
-            </div>
-            <div className="flex gap-2 pt-2">
-                <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition-colors"
-                    disabled={loading}
-                >
-                    Cancel
-                </button>
-                <button
-                    type="submit"
-                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors disabled:opacity-50"
-                    disabled={loading}
-                >
-                    {loading ? 'Adding...' : 'Add Task'}
-                </button>
-            </div>
-        </form>
-    ), [newTask, loading, handleNewTaskChange]);
-
-    const EditTaskForm = useCallback(() => (
-        <form onSubmit={(e) => {
-            e.preventDefault();
-            saveEdit();
-        }} className="flex flex-col space-y-4">
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Task Title</label>
-                <input
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    type="text"
-                    value={editTask.title}
-                    onChange={(e) => handleEditTaskChange('title', e.target.value)}
-                    placeholder="Enter task title"
-                    required
-                    autoFocus
-                />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={editTask.description}
-                    onChange={(e) => handleEditTaskChange('description', e.target.value)}
-                    placeholder="Enter task description"
-                    rows="3"
-                    required
-                />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
-                <input
-                    type="date"
-                    value={editTask.due_date}
-                    onChange={(e) => handleEditTaskChange('due_date', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-            </div>
-            <div className="flex space-x-2">
-                <select
-                    value={editTask.priority}
-                    onChange={(e) => handleEditTaskChange('priority', e.target.value)}
-                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                    <option value="Low">Low Priority</option>
-                    <option value="Medium">Medium Priority</option>
-                    <option value="High">High Priority</option>
-                </select>
-                <select
-                    value={editTask.urgency}
-                    onChange={(e) => handleEditTaskChange('urgency', e.target.value)}
-                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                    <option value="Low">Low Urgency</option>
-                    <option value="Medium">Medium Urgency</option>
-                    <option value="High">High Urgency</option>
-                </select>
-            </div>
-            <div className="flex gap-2 pt-2">
-                <button
-                    type="button"
-                    onClick={() => setEditTask({
-                        id: null,
-                        title: '',
-                        description: '',
-                        priority: 'Medium',
-                        urgency: 'Medium',
-                        due_date: ''
-                    })}
-                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition-colors"
-                >
-                    Cancel
-                </button>
-                <button
-                    type="submit"
-                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
-                >
-                    Update Task
-                </button>
-            </div>
-        </form>
-    ), [editTask, handleEditTaskChange]);
-
     const TaskItem = useCallback(({ task }) => {
         const progress = calculateProgress(task);
         return (
@@ -451,7 +450,7 @@ const TaskManager = () => {
                             })}
                             type="button"
                         >
-                            <FaEdit size={18} /> {/* Changed to FaEdit */}
+                            <FaEdit size={18} />
                         </button>
                         <button
                             onClick={() => deleteTask(task._id)}
@@ -468,7 +467,13 @@ const TaskManager = () => {
                         <div className="flex justify-between items-center mb-3">
                             <h4 className="font-medium text-gray-700">Subtasks</h4>
                             <button
-                                onClick={() => setNewSubTask({ taskId: task._id, title: '' })}
+                                onClick={() => {
+                                    if (newSubTask.taskId === task._id) {
+                                        setNewSubTask({ taskId: null, title: '' });
+                                    } else {
+                                        setNewSubTask({ taskId: task._id, title: '' });
+                                    }
+                                }}
                                 className="px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 hover:shadow-sm flex items-center gap-1"
                                 style={{
                                     backgroundColor: 'var(--primary-color)',
@@ -477,7 +482,7 @@ const TaskManager = () => {
                                 type="button"
                             >
                                 <MdAdd size={16} />
-                                Add Subtask
+                                {newSubTask.taskId === task._id ? 'Cancel' : 'Add Subtask'}
                             </button>
                         </div>
 
@@ -488,22 +493,22 @@ const TaskManager = () => {
                                     value={newSubTask.title}
                                     onChange={(e) => handleNewSubTaskChange(e.target.value)}
                                     placeholder="Enter subtask title"
-                                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-green-500"
+                                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                     autoFocus
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            addSubTask(task._id);
+                                        }
+                                    }}
                                 />
                                 <button
                                     onClick={() => addSubTask(task._id)}
                                     className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm transition-colors"
                                     type="button"
+                                    disabled={!newSubTask.title.trim()}
                                 >
                                     Add
-                                </button>
-                                <button
-                                    onClick={() => setNewSubTask({ taskId: null, title: '' })}
-                                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-3 py-2 rounded-md text-sm transition-colors"
-                                    type="button"
-                                >
-                                    Cancel
                                 </button>
                             </div>
                         )}
@@ -534,13 +539,11 @@ const TaskManager = () => {
                                         >
                                             <FaTrashAlt size={14} />
                                         </button>
-
                                     </div>
                                 ))
                             ) : (
                                 <div className="text-center text-gray-400 py-4">No subtasks yet. Add your first subtask!</div>
                             )}
-
                         </div>
                     </div>
                 )}
@@ -590,7 +593,13 @@ const TaskManager = () => {
                 isOpen={isModalOpen}
                 onClose={() => !loading && setIsModalOpen(false)}
             >
-                <AddTaskForm />
+                <AddTaskForm
+                    newTask={newTask}
+                    loading={loading}
+                    onNewTaskChange={handleNewTaskChange}
+                    onAddTask={addTask}
+                    onCancel={() => setIsModalOpen(false)}
+                />
             </Modal>
 
             {/* Edit Task Modal */}
@@ -606,7 +615,19 @@ const TaskManager = () => {
                     due_date: ''
                 })}
             >
-                <EditTaskForm />
+                <EditTaskForm
+                    editTask={editTask}
+                    onEditTaskChange={handleEditTaskChange}
+                    onSaveEdit={saveEdit}
+                    onCancel={() => setEditTask({
+                        id: null,
+                        title: '',
+                        description: '',
+                        priority: 'Medium',
+                        urgency: 'Medium',
+                        due_date: ''
+                    })}
+                />
             </Modal>
         </div>
     );
